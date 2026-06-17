@@ -1,0 +1,16 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/espn-scoreboard",
+      "destination": "/api/espn-scoreboard.js"
+    },
+    {
+      "source": "/api/espn-tee-times",
+      "destination": "/api/espn-tee-times.js"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
