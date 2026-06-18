@@ -4,7 +4,6 @@ import {
   ArrowDownUp,
   BadgeCheck,
   ChevronRight,
-  Clock3,
   Clipboard,
   Flame,
   Medal,
@@ -87,8 +86,6 @@ function App() {
           <FamilyView
             entries={familyEntries}
             overallEntries={overallEntries}
-            liveScores={liveScores}
-            teeTimes={teeTimes}
           />
         )}
         {activeView === 'overall' && <OverallView entries={overallEntries} />}
@@ -320,17 +317,13 @@ function ViewTabs({ activeView, setActiveView }: { activeView: ActiveView; setAc
 function FamilyView({
   entries,
   overallEntries,
-  liveScores,
-  teeTimes,
 }: {
   entries: EntryScore[]
   overallEntries: EntryScore[]
-  liveScores: GolferScore[]
-  teeTimes: TeeTime[]
 }) {
   return (
     <div className="view-stack">
-      <DramaPanel entries={entries} overallEntries={overallEntries} liveScores={liveScores} teeTimes={teeTimes} />
+      <DramaPanel entries={entries} overallEntries={overallEntries} />
       <section className="scoreboard-card">
         <SectionTitle kicker="Family Race" title="Francoeur standings" action={<CopyStandingsButton entries={entries} />} />
         <div className="entry-list family-list">
@@ -393,18 +386,12 @@ function benchStatus(entry: EntryScore) {
 function DramaPanel({
   entries,
   overallEntries,
-  liveScores,
-  teeTimes,
 }: {
   entries: EntryScore[]
   overallEntries: EntryScore[]
-  liveScores: GolferScore[]
-  teeTimes: TeeTime[]
 }) {
   const bestPick = [...entries.flatMap((entry) => entry.roster.map((slot) => ({ ...slot, owner: entry.name })))]
     .sort((a, b) => a.golfer.score - b.golfer.score)[0]
-  const danger = [...entries].sort((a, b) => b.cutCount - a.cutCount || b.total - a.total)[0]
-  const nextTee = nextPoolTeeTime(liveScores, teeTimes, entries)
   const topFamily = entries[0]
   const tiedFamilyCount = entries.filter((entry) => entry.total === topFamily?.total).length
   const poolContext = topFamily ? overallEntries.find((entry) => entry.id === topFamily.id) : undefined
@@ -425,35 +412,8 @@ function DramaPanel({
         <span><ArrowDownUp size={16} /> Pick Swing</span>
         <strong>{bestPick ? `${bestPick.name} is carrying ${bestPick.owner} at ${bestPick.golfer.scoreLabel}.` : 'No picks yet.'}</strong>
       </article>
-      <article className="drama-card">
-        <span><AlertTriangle size={16} /> Bench Watch</span>
-        <strong>{danger?.cutCount ? `${danger.name} has ${danger.cutCount} starter cut alert.` : 'No family bench panic yet.'}</strong>
-      </article>
-      <article className="drama-card">
-        <span><Clock3 size={16} /> Next Tee</span>
-        <strong>{nextTee ? `${nextTee.name}, ${nextTee.teeTime} · ${teeLabel(nextTee.startHole)}` : 'Everyone is waiting for the horn.'}</strong>
-      </article>
     </section>
   )
-}
-
-function teeLabel(startHole: number) {
-  return startHole === 10 ? '10th tee' : '1st tee'
-}
-
-function nextPoolTeeTime(liveScores: GolferScore[], teeTimes: TeeTime[], entries: EntryScore[]) {
-  const poolNames = new Set(entries.flatMap((entry) => [...entry.starters, ...entry.bench]).map(normalizeName))
-  const liveMap = buildGolferMap(liveScores, staticTeeTimes)
-
-  return teeTimes
-    .filter((teeTime) => poolNames.has(normalizeName(teeTime.name)))
-    .map((teeTime) => ({
-      ...teeTime,
-      golfer: liveMap.get(normalizeName(teeTime.name)),
-      minutes: timeToMinutes(teeTime.teeTime),
-    }))
-    .filter((row) => !row.golfer || row.golfer.status === 'pending')
-    .sort((a, b) => a.minutes - b.minutes)[0]
 }
 
 function OverallView({ entries }: { entries: EntryScore[] }) {
