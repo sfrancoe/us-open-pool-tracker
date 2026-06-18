@@ -433,7 +433,6 @@ function OverallView({ entries }: { entries: EntryScore[] }) {
             <span className="rank-token">{entry.poolRank}</span>
             <div>
               <strong>{entry.name}</strong>
-              <small>{entry.group === 'family' ? 'Francoeur Family' : 'Overall pool'}</small>
             </div>
             <span>{behindLabel(entry.poolBehind)}</span>
             <b>{entry.totalLabel}</b>
