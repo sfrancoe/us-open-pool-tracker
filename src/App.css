@@ -340,6 +340,18 @@
   gap: 8px;
 }
 
+.overall-entry {
+  overflow: hidden;
+  border: 1px solid #ece2ca;
+  border-radius: 8px;
+  background: #fffdf7;
+}
+
+.overall-entry.family {
+  border-color: #dcc16b;
+  background: #fff8df;
+}
+
 .entry-card {
   border: 1px solid #ece2ca;
   border-radius: 8px;
@@ -511,12 +523,15 @@
 }
 
 .overall-row {
-  grid-template-columns: 32px minmax(0, 1fr) 74px 52px 18px;
-}
-
-.overall-row.family {
-  background: #fff8df;
-  border-color: #dcc16b;
+  width: 100%;
+  grid-template-columns: 32px minmax(0, 1fr) 74px 52px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
 }
 
 .overall-row > span {
@@ -524,6 +539,19 @@
   font-size: 0.75rem;
   font-weight: 880;
   text-align: center;
+}
+
+.overall-picks {
+  border-top: 1px solid #ece2ca;
+  padding: 10px;
+}
+
+.overall-entry.family .overall-picks {
+  border-top-color: #dcc16b;
+}
+
+.overall-picks .roster-grid {
+  margin-top: 0;
 }
 
 .tee-row {
@@ -666,10 +694,6 @@
 
   .overall-row {
     grid-template-columns: 30px minmax(0, 1fr) 58px 48px;
-  }
-
-  .overall-row svg {
-    display: none;
   }
 
   .tee-row {

@@ -3,7 +3,6 @@ import {
   AlertTriangle,
   ArrowDownUp,
   BadgeCheck,
-  ChevronRight,
   Clipboard,
   Flame,
   Medal,
@@ -428,6 +427,7 @@ function DramaPanel({
 
 function OverallView({ entries }: { entries: EntryScore[] }) {
   const [query, setQuery] = useState('')
+  const [expandedEntryId, setExpandedEntryId] = useState<string | null>(null)
   const filtered = entries.filter((entry) => entry.name.toLowerCase().includes(query.toLowerCase()))
 
   return (
@@ -438,17 +438,34 @@ function OverallView({ entries }: { entries: EntryScore[] }) {
         <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search entrants" />
       </label>
       <div className="overall-list">
-        {filtered.map((entry) => (
-          <article key={entry.id} className={`overall-row ${entry.group === 'family' ? 'family' : ''}`}>
-            <span className="rank-token">{entry.poolRank}</span>
-            <div>
-              <strong>{entry.name}</strong>
-            </div>
-            <span>{behindLabel(entry.poolBehind)}</span>
-            <b className={scoreClass(entry.total)}>{entry.totalLabel}</b>
-            <ChevronRight size={16} />
-          </article>
-        ))}
+        {filtered.map((entry) => {
+          const isExpanded = expandedEntryId === entry.id
+          const picksId = `overall-picks-${entry.id}`
+
+          return (
+            <article key={entry.id} className={`overall-entry ${entry.group === 'family' ? 'family' : ''}`}>
+              <button
+                type="button"
+                className="overall-row"
+                aria-expanded={isExpanded}
+                aria-controls={picksId}
+                onClick={() => setExpandedEntryId(isExpanded ? null : entry.id)}
+              >
+                <span className="rank-token">{entry.poolRank}</span>
+                <div>
+                  <strong>{entry.name}</strong>
+                </div>
+                <span>{behindLabel(entry.poolBehind)}</span>
+                <b className={scoreClass(entry.total)}>{entry.totalLabel}</b>
+              </button>
+              {isExpanded && (
+                <div id={picksId} className="overall-picks">
+                  <RosterChips entry={entry} />
+                </div>
+              )}
+            </article>
+          )
+        })}
       </div>
     </section>
   )
