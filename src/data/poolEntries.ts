@@ -777,7 +777,7 @@ export const poolEntries: PoolEntry[] = [
   {
     "id": "mike-s-vodka",
     "name": "Mike’s Vodka",
-    "group": "overall",
+    "group": "family",
     "starters": [
       "Scheffler, S",
       "Burns, S",
