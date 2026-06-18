@@ -479,9 +479,10 @@ function TeeTimesView({ liveScores, teeTimes }: { liveScores: GolferScore[]; tee
                 <strong>{teeTime.name}</strong>
                 <small>{golfer?.country ?? 'U.S. Open field'}</small>
               </div>
-              <span>{teeTime.teeTime}</span>
-              <b>{playPositionLabel(golfer, teeTime)}</b>
-              <em className={scoreClass(golfer?.score ?? 0)}>{golfer?.scoreLabel ?? 'E'}</em>
+              <em className={scoreClass(golfer?.score ?? 0)}>
+                <span>{golfer?.scoreLabel ?? 'E'}</span>
+                <small>({playPositionLabel(golfer, teeTime)})</small>
+              </em>
             </article>
           )
         })}
@@ -491,8 +492,7 @@ function TeeTimesView({ liveScores, teeTimes }: { liveScores: GolferScore[]; tee
 }
 
 function playPositionLabel(golfer: GolferScore | undefined, teeTime: TeeTime) {
-  const startTeeLabel = teeTime.startHole === 10 ? '10th tee' : '1st tee'
-  if (!golfer || golfer.status === 'pending') return startTeeLabel
+  if (!golfer || golfer.status === 'pending') return teeTime.teeTime
   if (golfer.status === 'withdrawn') return 'WD'
   if (golfer.status === 'cut') return 'CUT'
   if (golfer.status === 'final' || golfer.thru === 'F') return 'F'

@@ -527,19 +527,22 @@
 }
 
 .tee-row {
-  grid-template-columns: minmax(0, 1fr) 72px 66px 44px;
+  grid-template-columns: minmax(0, 1fr) minmax(96px, max-content);
 }
 
-.tee-row span,
-.tee-row b {
-  color: #17231d;
-  font-size: 0.78rem;
-  font-weight: 920;
-  text-align: center;
+.tee-row em {
+  display: inline-flex;
+  align-items: baseline;
+  justify-self: end;
+  gap: 4px;
+  white-space: nowrap;
 }
 
-.tee-row b {
+.tee-row em small {
   color: #7a6228;
+  font-size: 0.72rem;
+  font-style: normal;
+  font-weight: 900;
 }
 
 .under {
@@ -670,7 +673,7 @@
   }
 
   .tee-row {
-    grid-template-columns: minmax(0, 1fr) 62px 58px 38px;
+    grid-template-columns: minmax(0, 1fr) minmax(86px, max-content);
     gap: 6px;
     padding: 9px 8px;
   }
