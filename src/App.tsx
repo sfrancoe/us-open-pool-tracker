@@ -450,7 +450,16 @@ function TeeTimesView({ liveScores, teeTimes }: { liveScores: GolferScore[]; tee
   const golferMap = buildGolferMap(liveScores, staticTeeTimes)
   const rows = teeTimes
     .filter((teeTime) => teeTime.name.toLowerCase().includes(query.toLowerCase()))
-    .sort((a, b) => timeToMinutes(a.teeTime) - timeToMinutes(b.teeTime) || a.startHole - b.startHole)
+    .sort((a, b) => {
+      const golferA = golferMap.get(normalizeName(a.name))
+      const golferB = golferMap.get(normalizeName(b.name))
+      return (
+        (golferA?.score ?? 0) - (golferB?.score ?? 0) ||
+        (golferA?.place ?? 999) - (golferB?.place ?? 999) ||
+        timeToMinutes(a.teeTime) - timeToMinutes(b.teeTime) ||
+        a.name.localeCompare(b.name)
+      )
+    })
 
   return (
     <section className="scoreboard-card">
