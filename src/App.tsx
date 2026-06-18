@@ -315,9 +315,9 @@ function MetricCard({ icon, label, value, detail }: { icon: React.ReactNode; lab
 
 function ViewTabs({ activeView, setActiveView }: { activeView: ActiveView; setActiveView: (view: ActiveView) => void }) {
   const tabs: Array<{ id: ActiveView; label: string }> = [
-    { id: 'family', label: 'Family' },
+    { id: 'tee-times', label: 'Leaderboard' },
     { id: 'overall', label: 'Overall' },
-    { id: 'tee-times', label: 'Tee Times' },
+    { id: 'family', label: 'Francoeur Family' },
   ]
 
   return (
@@ -513,7 +513,7 @@ function TeeTimesView({ liveScores, teeTimes }: { liveScores: GolferScore[]; tee
 
   return (
     <section className="scoreboard-card">
-      <SectionTitle kicker="Round 1" title="Starting tee times" />
+      <SectionTitle kicker="Tournament" title="Leaderboard" />
       <label className="search-box">
         <Search size={16} />
         <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search golfers" />
