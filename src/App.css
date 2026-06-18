@@ -543,15 +543,15 @@
 }
 
 .under {
-  color: #087343 !important;
-}
-
-.over {
   color: #b83a2f !important;
 }
 
+.over {
+  color: #14110c !important;
+}
+
 .even {
-  color: #1b5f8d !important;
+  color: #087343 !important;
 }
 
 .search-box {

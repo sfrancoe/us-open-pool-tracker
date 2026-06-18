@@ -48,7 +48,7 @@ function cacheBustedUrl(url: string) {
 }
 
 function App() {
-  const [activeView, setActiveView] = useState<ActiveView>('family')
+  const [activeView, setActiveView] = useState<ActiveView>('tee-times')
   const { event, liveScores, teeTimes, updatedAt, isLoading, isRefreshing, error, refreshScores } = useTournamentData()
   const golferMap = useMemo(() => buildGolferMap(liveScores, staticTeeTimes), [liveScores])
   const scoredEntries = useMemo(() => scoreEntries(poolEntries, golferMap), [golferMap])
