@@ -348,19 +348,26 @@ function FamilyEntryCard({ entry, leader }: { entry: EntryScore; leader?: EntryS
           <small>{behindLabel(entry.familyBehind ?? entry.total - (leader?.total ?? entry.total))}</small>
         </div>
       </div>
-      <RosterChips entry={entry} />
+      <RosterChips entry={entry} showPosition />
     </article>
   )
 }
 
-function RosterChips({ entry }: { entry: EntryScore }) {
+function RosterChips({ entry, showPosition = false }: { entry: EntryScore; showPosition?: boolean }) {
   return (
     <div className="roster-grid">
       {entry.roster.map((slot, index) => (
-        <span key={`${entry.id}-${slot.name}-${slot.state}-${index}`} className={`player-chip ${slot.state}`}>
+        <span key={`${entry.id}-${slot.name}-${slot.state}-${index}`} className={`player-chip ${slot.state} ${showPosition ? 'with-position' : ''}`}>
           <small>{slot.role === 'bench' ? (slot.state === 'promoted' ? 'B+' : 'B') : 'S'}</small>
           <b>{slot.name}</b>
-          <em className={scoreClass(slot.golfer.score)}>{slot.golfer.scoreLabel}</em>
+          {showPosition ? (
+            <em className={scoreClass(slot.golfer.score)}>
+              <span>{slot.golfer.scoreLabel}</span>
+              <small>({playPositionLabel(slot.golfer)})</small>
+            </em>
+          ) : (
+            <em className={scoreClass(slot.golfer.score)}>{slot.golfer.scoreLabel}</em>
+          )}
         </span>
       ))}
     </div>
@@ -503,8 +510,8 @@ function TeeTimesView({ liveScores, teeTimes }: { liveScores: GolferScore[]; tee
   )
 }
 
-function playPositionLabel(golfer: GolferScore | undefined, teeTime: TeeTime) {
-  if (!golfer || golfer.status === 'pending') return teeTime.teeTime
+function playPositionLabel(golfer: GolferScore | undefined, teeTime?: TeeTime) {
+  if (!golfer || golfer.status === 'pending') return golfer?.teeTime ?? teeTime?.teeTime ?? '-'
   if (golfer.status === 'withdrawn') return 'WD'
   if (golfer.status === 'cut') return 'CUT'
   if (golfer.status === 'final' || golfer.thru === 'F') return 'F'
@@ -513,7 +520,7 @@ function playPositionLabel(golfer: GolferScore | undefined, teeTime: TeeTime) {
   const completedHoles = Number.isFinite(thru) ? thru : golfer.holes.length
   if (completedHoles >= 18) return 'F'
 
-  const startHole = golfer.startHole ?? teeTime.startHole
+  const startHole = golfer.startHole ?? teeTime?.startHole ?? 1
   const marker = startHole === 10 ? '*' : ''
   return `${nextHoleFromStart(startHole, Math.max(completedHoles, 0))}${marker}`
 }

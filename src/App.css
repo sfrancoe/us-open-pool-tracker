@@ -440,7 +440,7 @@
   padding: 4px 6px;
 }
 
-.player-chip small {
+.player-chip > small {
   width: 21px;
   height: 21px;
   display: grid;
@@ -468,6 +468,29 @@
   font-style: normal;
   font-weight: 950;
   text-align: right;
+}
+
+.player-chip.with-position {
+  grid-template-columns: 22px minmax(0, 1fr) 76px;
+}
+
+.player-chip.with-position em {
+  display: grid;
+  grid-template-columns: 25px minmax(0, 1fr);
+  align-items: baseline;
+  column-gap: 4px;
+  white-space: nowrap;
+}
+
+.player-chip em span {
+  text-align: right;
+}
+
+.player-chip em small {
+  color: #7a6228;
+  font-size: 0.64rem;
+  font-style: normal;
+  font-weight: 900;
 }
 
 .player-chip.bench small {
