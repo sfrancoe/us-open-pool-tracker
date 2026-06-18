@@ -202,7 +202,6 @@
 .entry-score small,
 .overall-row small,
 .tee-row small,
-.bench-status,
 .drama-card span {
   color: #7a705e;
   font-size: 0.68rem;
@@ -490,14 +489,6 @@
 .player-chip.cut small,
 .player-chip.unavailable small {
   background: #a94f36;
-}
-
-.bench-status {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 9px;
-  color: #665b49;
 }
 
 .overall-row,

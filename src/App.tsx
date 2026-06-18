@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   AlertTriangle,
   ArrowDownUp,
-  BadgeCheck,
   Flame,
   Medal,
   RefreshCw,
@@ -323,7 +322,6 @@ function FamilyView({
     <div className="view-stack">
       <DramaPanel entries={entries} overallEntries={overallEntries} />
       <section className="scoreboard-card">
-        <SectionTitle kicker="Family Race" title="Francoeur standings" />
         <div className="entry-list family-list">
           {entries.map((entry) => (
             <FamilyEntryCard key={entry.id} entry={entry} leader={entries[0]} />
@@ -351,10 +349,6 @@ function FamilyEntryCard({ entry, leader }: { entry: EntryScore; leader?: EntryS
         </div>
       </div>
       <RosterChips entry={entry} />
-      <div className="bench-status">
-        <BadgeCheck size={15} />
-        <span>{benchStatus(entry)}</span>
-      </div>
     </article>
   )
 }
@@ -371,14 +365,6 @@ function RosterChips({ entry }: { entry: EntryScore }) {
       ))}
     </div>
   )
-}
-
-function benchStatus(entry: EntryScore) {
-  if (entry.eliminated) return 'Three starters missed the cut: entry is out after Friday.'
-  if (entry.promotedCount === 2) return 'Both bench players are active.'
-  if (entry.promotedCount === 1) return 'First bench player is promoted.'
-  if (entry.cutCount > 0) return 'Cut pressure is building.'
-  return 'Four starters counting; bench is standing by.'
 }
 
 function DramaPanel({
