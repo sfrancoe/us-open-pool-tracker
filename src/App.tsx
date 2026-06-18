@@ -502,7 +502,7 @@ function playPositionLabel(golfer: GolferScore | undefined, teeTime: TeeTime) {
   if (completedHoles >= 18) return 'F'
 
   const startHole = golfer.startHole ?? teeTime.startHole
-  return `Hole ${nextHoleFromStart(startHole, Math.max(completedHoles, 0))}`
+  return String(nextHoleFromStart(startHole, Math.max(completedHoles, 0)))
 }
 
 function nextHoleFromStart(startHole: TeeTime['startHole'], completedHoles: number) {
