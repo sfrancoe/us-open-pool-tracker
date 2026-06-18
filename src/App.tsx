@@ -44,6 +44,10 @@ const teeTimesUrl = import.meta.env.DEV
   ? '/espn-page/golf/leaderboard/_/tournamentId/401811952'
   : '/api/espn-tee-times'
 
+function cacheBustedUrl(url: string) {
+  return `${url}${url.includes('?') ? '&' : '?'}_=${Date.now()}`
+}
+
 function App() {
   const [activeView, setActiveView] = useState<ActiveView>('family')
   const { event, liveScores, teeTimes, updatedAt, isLoading, isRefreshing, error, refreshScores } = useTournamentData()
@@ -108,8 +112,8 @@ function useTournamentData() {
     if (!silent) setIsRefreshing(true)
     try {
       const [scoreboardResponse, teeTimesResponse] = await Promise.allSettled([
-        fetch(`${scoreboardUrl}&_=${Date.now()}`),
-        fetch(`${teeTimesUrl}${teeTimesUrl.includes('?') ? '&' : '?'}_=${Date.now()}`),
+        fetch(cacheBustedUrl(scoreboardUrl)),
+        fetch(cacheBustedUrl(teeTimesUrl)),
       ])
 
       if (scoreboardResponse.status !== 'fulfilled' || !scoreboardResponse.value.ok) {
