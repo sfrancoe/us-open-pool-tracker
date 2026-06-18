@@ -150,14 +150,6 @@
   box-sizing: border-box;
 }
 
-.hero-panel {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(340px, 0.9fr);
-  gap: 10px;
-  align-items: stretch;
-}
-
-.hero-main,
 .scoreboard-card,
 .drama-card,
 .metric-card {
@@ -167,15 +159,6 @@
   box-shadow: 0 14px 34px rgba(27, 22, 13, 0.08);
 }
 
-.hero-main {
-  min-height: 154px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 18px;
-}
-
-.hero-main h2,
 .section-title h3 {
   margin: 4px 0;
   color: #17231d;
@@ -184,18 +167,14 @@
   letter-spacing: 0;
 }
 
-.hero-main p {
-  max-width: 620px;
-  color: #695f4d;
-  font-size: 0.88rem;
-  font-weight: 700;
-  line-height: 1.35;
-}
-
 .hero-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
+}
+
+.summary-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .metric-card {
@@ -605,7 +584,6 @@
 }
 
 @media (max-width: 860px) {
-  .hero-panel,
   .drama-panel {
     grid-template-columns: 1fr;
   }
@@ -651,15 +629,6 @@
   .view-tabs {
     width: calc(100% - 16px);
     margin-bottom: 10px;
-  }
-
-  .hero-main {
-    min-height: 130px;
-    padding: 14px;
-  }
-
-  .hero-main h2 {
-    font-size: 1.25rem;
   }
 
   .hero-grid {

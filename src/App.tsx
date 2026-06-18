@@ -274,30 +274,11 @@ function HeroPanel({
   const cutAlerts = familyEntries.reduce((sum, entry) => sum + entry.cutCount, 0)
 
   return (
-    <section className="hero-panel">
-      <div className="hero-main">
-        <span className="eyebrow">Francoeur Family</span>
-        <h2>
-          {familyLeader
-            ? familyLeaderCount > 1
-              ? `All square at ${familyLeader.totalLabel}`
-              : `${familyLeader.name} leads at ${familyLeader.totalLabel}`
-            : 'Waiting for scores'}
-        </h2>
-        <p>
-          {familyLeader && familyLeaderCount > 1
-            ? `${familyLeaderCount} family entries are tied, and the whole pool is still level at ${familyLeader.totalLabel}.`
-            : bestFamilyPoolRank
-            ? `${bestFamilyPoolRank.name} is the best family entry in the full pool at #${bestFamilyPoolRank.poolRank}.`
-            : 'Overall pool position will appear once entries load.'}
-        </p>
-      </div>
-      <div className="hero-grid">
-        <MetricCard icon={<Trophy size={17} />} label="Family leader" value={familyLeaderCount > 1 ? `${familyLeaderCount} tied` : familyLeader?.name ?? '-'} detail={familyLeader?.totalLabel ?? '-'} />
-        <MetricCard icon={<Medal size={17} />} label="Overall leader" value={poolLeaderCount > 1 ? `${poolLeaderCount} tied` : poolLeader?.name ?? '-'} detail={poolLeader?.totalLabel ?? '-'} />
-        <MetricCard icon={<Users size={17} />} label="Best family pool pos." value={bestFamilyPoolRank ? `#${bestFamilyPoolRank.poolRank}` : '-'} detail={bestFamilyPoolRank?.name ?? '-'} />
-        <MetricCard icon={<AlertTriangle size={17} />} label="Cut alerts" value={`${cutAlerts}`} detail="family starters" />
-      </div>
+    <section className="hero-grid summary-grid">
+      <MetricCard icon={<Trophy size={17} />} label="Family leader" value={familyLeaderCount > 1 ? `${familyLeaderCount} tied` : familyLeader?.name ?? '-'} detail={familyLeader?.totalLabel ?? '-'} />
+      <MetricCard icon={<Medal size={17} />} label="Overall leader" value={poolLeaderCount > 1 ? `${poolLeaderCount} tied` : poolLeader?.name ?? '-'} detail={poolLeader?.totalLabel ?? '-'} />
+      <MetricCard icon={<Users size={17} />} label="Best family pool pos." value={bestFamilyPoolRank ? `#${bestFamilyPoolRank.poolRank}` : '-'} detail={bestFamilyPoolRank?.name ?? '-'} />
+      <MetricCard icon={<AlertTriangle size={17} />} label="Cut alerts" value={`${cutAlerts}`} detail="family starters" />
     </section>
   )
 }
