@@ -73,6 +73,7 @@ function App() {
         error={error}
         refreshScores={refreshScores}
       />
+      <ViewTabs activeView={activeView} setActiveView={setActiveView} />
       <section className="mobile-stage">
         <HeroPanel
           familyLeader={familyLeader}
@@ -82,7 +83,6 @@ function App() {
           bestFamilyPoolRank={bestFamilyPoolRank}
           familyEntries={familyEntries}
         />
-        <ViewTabs activeView={activeView} setActiveView={setActiveView} />
         {activeView === 'family' && (
           <FamilyView
             entries={familyEntries}
