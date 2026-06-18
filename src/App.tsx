@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   AlertTriangle,
   ArrowDownUp,
@@ -8,6 +8,7 @@ import {
   Clipboard,
   Flame,
   Medal,
+  RefreshCw,
   Search,
   Shield,
   Trophy,
@@ -45,7 +46,7 @@ const teeTimesUrl = import.meta.env.DEV
 
 function App() {
   const [activeView, setActiveView] = useState<ActiveView>('family')
-  const { event, liveScores, teeTimes, updatedAt, isLoading, error } = useTournamentData()
+  const { event, liveScores, teeTimes, updatedAt, isLoading, isRefreshing, error, refreshScores } = useTournamentData()
   const golferMap = useMemo(() => buildGolferMap(liveScores, staticTeeTimes), [liveScores])
   const scoredEntries = useMemo(() => scoreEntries(poolEntries, golferMap), [golferMap])
   const familyEntries = scoredEntries
@@ -60,7 +61,14 @@ function App() {
 
   return (
     <main className="app-shell">
-      <Header event={event} updatedAt={updatedAt} isLoading={isLoading} error={error} />
+      <Header
+        event={event}
+        updatedAt={updatedAt}
+        isLoading={isLoading}
+        isRefreshing={isRefreshing}
+        error={error}
+        refreshScores={refreshScores}
+      />
       <section className="mobile-stage">
         <HeroPanel
           familyLeader={familyLeader}
@@ -92,68 +100,78 @@ function useTournamentData() {
   const [teeTimes, setTeeTimes] = useState<TeeTime[]>(staticTeeTimes)
   const [updatedAt, setUpdatedAt] = useState<Date | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isRefreshing, setIsRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const isMounted = useRef(true)
 
-  useEffect(() => {
-    let active = true
+  const load = useCallback(async ({ silent = false }: { silent?: boolean } = {}) => {
+    if (!silent) setIsRefreshing(true)
+    try {
+      const [scoreboardResponse, teeTimesResponse] = await Promise.allSettled([
+        fetch(`${scoreboardUrl}&_=${Date.now()}`),
+        fetch(`${teeTimesUrl}${teeTimesUrl.includes('?') ? '&' : '?'}_=${Date.now()}`),
+      ])
 
-    async function load() {
-      try {
-        const [scoreboardResponse, teeTimesResponse] = await Promise.allSettled([
-          fetch(`${scoreboardUrl}&_=${Date.now()}`),
-          fetch(`${teeTimesUrl}${teeTimesUrl.includes('?') ? '&' : '?'}_=${Date.now()}`),
-        ])
+      if (scoreboardResponse.status !== 'fulfilled' || !scoreboardResponse.value.ok) {
+        throw new Error('Unable to load ESPN scores')
+      }
 
-        if (scoreboardResponse.status !== 'fulfilled' || !scoreboardResponse.value.ok) {
-          throw new Error('Unable to load ESPN scores')
+      const scoreboardData = await scoreboardResponse.value.json()
+      const nextEvent = scoreboardData?.events?.[0] as EspnEvent | undefined
+      if (!nextEvent?.competitions?.[0]?.competitors?.length) {
+        throw new Error('No U.S. Open leaderboard rows found')
+      }
+
+      let nextTeeTimes = staticTeeTimes
+      if (teeTimesResponse.status === 'fulfilled' && teeTimesResponse.value.ok) {
+        const contentType = teeTimesResponse.value.headers.get('content-type') ?? ''
+        if (contentType.includes('application/json')) {
+          const data = await teeTimesResponse.value.json()
+          if (Array.isArray(data.teeTimes) && data.teeTimes.length) nextTeeTimes = data.teeTimes
+        } else {
+          const html = await teeTimesResponse.value.text()
+          const parsed = parseEspnTeeTimesFromHtml(html)
+          if (parsed.length) nextTeeTimes = parsed
         }
+      }
 
-        const scoreboardData = await scoreboardResponse.value.json()
-        const nextEvent = scoreboardData?.events?.[0] as EspnEvent | undefined
-        if (!nextEvent?.competitions?.[0]?.competitors?.length) {
-          throw new Error('No U.S. Open leaderboard rows found')
-        }
-
-        let nextTeeTimes = staticTeeTimes
-        if (teeTimesResponse.status === 'fulfilled' && teeTimesResponse.value.ok) {
-          const contentType = teeTimesResponse.value.headers.get('content-type') ?? ''
-          if (contentType.includes('application/json')) {
-            const data = await teeTimesResponse.value.json()
-            if (Array.isArray(data.teeTimes) && data.teeTimes.length) nextTeeTimes = data.teeTimes
-          } else {
-            const html = await teeTimesResponse.value.text()
-            const parsed = parseEspnTeeTimesFromHtml(html)
-            if (parsed.length) nextTeeTimes = parsed
-          }
-        }
-
-        if (active) {
-          setEvent(nextEvent)
-          setTeeTimes(nextTeeTimes)
-          setUpdatedAt(new Date())
-          setError(null)
-        }
-      } catch (caught) {
-        if (active) setError(caught instanceof Error ? caught.message : 'Unable to load tournament data')
-      } finally {
-        if (active) setIsLoading(false)
+      if (!isMounted.current) return
+      setEvent(nextEvent)
+      setTeeTimes(nextTeeTimes)
+      setUpdatedAt(new Date())
+      setError(null)
+    } catch (caught) {
+      if (!isMounted.current) return
+      setError(caught instanceof Error ? caught.message : 'Unable to load tournament data')
+    } finally {
+      if (isMounted.current) {
+        setIsLoading(false)
+        if (!silent) setIsRefreshing(false)
       }
     }
+  }, [])
 
-    load()
-    const timer = window.setInterval(load, 60000)
+  useEffect(() => {
+    isMounted.current = true
+    window.setTimeout(() => {
+      if (isMounted.current) load({ silent: true })
+    }, 0)
+    const timer = window.setInterval(() => {
+      load({ silent: true })
+    }, 60000)
+
     return () => {
-      active = false
+      isMounted.current = false
       window.clearInterval(timer)
     }
-  }, [])
+  }, [load])
 
   const liveScores = useMemo(() => {
     const teeMap = buildTeeTimeMap(staticTeeTimes, teeTimes)
     return toGolferScores(event, [...teeMap.values()])
   }, [event, teeTimes])
 
-  return { event, liveScores, teeTimes, updatedAt, isLoading, error }
+  return { event, liveScores, teeTimes, updatedAt, isLoading, isRefreshing, error, refreshScores: load }
 }
 
 function parseEspnTeeTimesFromHtml(html: string): TeeTime[] {
@@ -194,13 +212,19 @@ function Header({
   event,
   updatedAt,
   isLoading,
+  isRefreshing,
   error,
+  refreshScores,
 }: {
   event: EspnEvent | null
   updatedAt: Date | null
   isLoading: boolean
+  isRefreshing: boolean
   error: string | null
+  refreshScores: () => void
 }) {
+  const statusLabel = isLoading ? 'Syncing' : error ? 'Retry needed' : 'Live'
+
   return (
     <header className="app-header">
       <div className="brand-mark" aria-hidden="true">
@@ -211,12 +235,22 @@ function Header({
         <h1>{event?.name ?? 'US Open Pool Tracker'}</h1>
         <span>Shinnecock Hills · Southampton, NY · ESPN live scoring</span>
       </div>
-      <div className={`sync-pill ${error ? 'error' : ''}`}>
-        <span>{isLoading ? 'Syncing' : error ? 'Offline' : 'Live'}</span>
-        <small>{updatedAt ? updatedAt.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : 'Waiting'}</small>
+      <div className={`sync-panel ${error ? 'error' : ''}`}>
+        <div className="sync-copy">
+          <span>{statusLabel}</span>
+          <small>{updatedAt ? `Updated ${formatUpdateTime(updatedAt)}` : 'Update pending'}</small>
+        </div>
+        <button type="button" className="refresh-button" onClick={refreshScores} disabled={isRefreshing || isLoading}>
+          <RefreshCw size={15} className={isRefreshing || isLoading ? 'spin' : ''} />
+          <span>Refresh</span>
+        </button>
       </div>
     </header>
   )
+}
+
+function formatUpdateTime(date: Date) {
+  return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
 }
 
 function HeroPanel({
