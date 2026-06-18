@@ -555,15 +555,21 @@
 }
 
 .tee-row {
-  grid-template-columns: minmax(0, 1fr) minmax(96px, max-content);
+  grid-template-columns: minmax(0, 1fr) 104px;
 }
 
 .tee-row em {
-  display: inline-flex;
+  width: 104px;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
   align-items: baseline;
   justify-self: end;
-  gap: 4px;
+  column-gap: 6px;
   white-space: nowrap;
+}
+
+.tee-row em span {
+  text-align: right;
 }
 
 .tee-row em small {
@@ -697,7 +703,7 @@
   }
 
   .tee-row {
-    grid-template-columns: minmax(0, 1fr) minmax(86px, max-content);
+    grid-template-columns: minmax(0, 1fr) 104px;
     gap: 6px;
     padding: 9px 8px;
   }
