@@ -435,6 +435,9 @@ export function buildGolferMap(liveScores: GolferScore[], teeTimes: StaticTeeTim
   for (const score of liveScores) {
     map.set(normalizeName(score.name), score)
     map.set(normalizeName(score.displayName), score)
+    for (const alias of golferAliases(score.displayName)) {
+      map.set(alias, score)
+    }
   }
 
   for (const teeTime of teeTimes) {
@@ -449,6 +452,46 @@ export function buildGolferMap(liveScores: GolferScore[], teeTimes: StaticTeeTim
   }
 
   return map
+}
+
+const manualGolferAliasTargets: Record<string, string> = {
+  'Bryson DeChambeau': 'dechambeaub',
+  'Xander Schauffele': 'schaufelex',
+  'Russell Henley': 'henleyt',
+  'Patrick Cantlay': 'canylayp',
+  'Kurt Kitayama': 'kityamak',
+  'Maverick McNealy': 'mcneallym',
+  'Matt McCarty': 'mccarthyd',
+  'Hideki Matsuyama': 'matsuymah',
+  'Sepp Straka': 'strakas',
+  'Cameron Smith': 'smithc',
+  'Lucas Herbert': 'hebertl',
+  'Harry Hall': 'hallh',
+  'Danny Willett': 'willettd',
+  'Corey Conners': 'connorsc',
+}
+
+function golferAliases(displayName: string) {
+  const normalized = new Set<string>()
+  const parts = displayName.split(/\s+/).filter(Boolean)
+  const lastName = parts.at(-1)
+  const firstName = parts[0]
+
+  if (lastName && firstName) {
+    normalized.add(normalizeName(`${lastName}, ${firstName[0]}`))
+    normalized.add(normalizeName(`${lastName} ${firstName[0]}`))
+    normalized.add(normalizeName(`${lastName}, ${firstName.slice(0, 3)}`))
+    normalized.add(normalizeName(`${lastName} ${firstName.slice(0, 3)}`))
+  }
+
+  if (displayName === 'J.J. Spaun') {
+    normalized.add(normalizeName('Spaun, JJ'))
+  }
+
+  const manual = manualGolferAliasTargets[displayName]
+  if (manual) normalized.add(manual)
+
+  return normalized
 }
 
 function isCutOrUnavailable(golfer: GolferScore) {
