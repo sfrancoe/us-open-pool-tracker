@@ -247,8 +247,7 @@
   backdrop-filter: blur(14px);
 }
 
-.view-tabs button,
-.copy-button {
+.view-tabs button {
   min-height: 36px;
   border: 0;
   border-radius: 6px;
@@ -288,16 +287,6 @@
 
 .section-title h3 {
   font-size: 1.05rem;
-}
-
-.copy-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  background: #0b4f39;
-  color: #fffaf0;
-  padding: 0 11px;
 }
 
 .drama-panel {

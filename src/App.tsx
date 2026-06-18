@@ -3,7 +3,6 @@ import {
   AlertTriangle,
   ArrowDownUp,
   BadgeCheck,
-  Clipboard,
   Flame,
   Medal,
   RefreshCw,
@@ -324,7 +323,7 @@ function FamilyView({
     <div className="view-stack">
       <DramaPanel entries={entries} overallEntries={overallEntries} />
       <section className="scoreboard-card">
-        <SectionTitle kicker="Family Race" title="Francoeur standings" action={<CopyStandingsButton entries={entries} />} />
+        <SectionTitle kicker="Family Race" title="Francoeur standings" />
         <div className="entry-list family-list">
           {entries.map((entry) => (
             <FamilyEntryCard key={entry.id} entry={entry} leader={entries[0]} />
@@ -537,42 +536,14 @@ function nextHoleFromStart(startHole: TeeTime['startHole'], completedHoles: numb
   return ((startHole - 1 + completedHoles) % 18) + 1
 }
 
-function SectionTitle({ kicker, title, action }: { kicker: string; title: string; action?: React.ReactNode }) {
+function SectionTitle({ kicker, title }: { kicker: string; title: string }) {
   return (
     <div className="section-title">
       <div>
         <span className="eyebrow">{kicker}</span>
         <h3>{title}</h3>
       </div>
-      {action}
     </div>
-  )
-}
-
-function CopyStandingsButton({ entries }: { entries: EntryScore[] }) {
-  const [copied, setCopied] = useState(false)
-
-  async function copyStandings() {
-    const text = [
-      'Francoeur Family US Open Pool',
-      '',
-      ...entries.map((entry) => `${entry.familyRank}. ${entry.name} ${entry.totalLabel} · Pool #${entry.poolRank} · ${behindLabel(entry.familyBehind ?? 0)}`),
-    ].join('\n')
-
-    try {
-      await navigator.clipboard.writeText(text)
-      setCopied(true)
-      window.setTimeout(() => setCopied(false), 1400)
-    } catch {
-      setCopied(false)
-    }
-  }
-
-  return (
-    <button type="button" className="copy-button" onClick={copyStandings}>
-      <Clipboard size={15} />
-      {copied ? 'Copied' : 'Copy'}
-    </button>
   )
 }
 
