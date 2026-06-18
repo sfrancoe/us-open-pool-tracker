@@ -272,21 +272,21 @@ function HeroPanel({
 
   return (
     <section className="hero-grid summary-grid">
-      <MetricCard icon={<Trophy size={17} />} label="Family leader" value={familyLeaderCount > 1 ? `${familyLeaderCount} tied` : familyLeader?.name ?? '-'} detail={familyLeader?.totalLabel ?? '-'} />
-      <MetricCard icon={<Medal size={17} />} label="Overall leader" value={poolLeaderCount > 1 ? `${poolLeaderCount} tied` : poolLeader?.name ?? '-'} detail={poolLeader?.totalLabel ?? '-'} />
+      <MetricCard icon={<Trophy size={17} />} label="Family leader" value={familyLeaderCount > 1 ? `${familyLeaderCount} tied` : familyLeader?.name ?? '-'} detail={familyLeader?.totalLabel ?? '-'} detailClassName={familyLeader ? scoreClass(familyLeader.total) : undefined} />
+      <MetricCard icon={<Medal size={17} />} label="Overall leader" value={poolLeaderCount > 1 ? `${poolLeaderCount} tied` : poolLeader?.name ?? '-'} detail={poolLeader?.totalLabel ?? '-'} detailClassName={poolLeader ? scoreClass(poolLeader.total) : undefined} />
       <MetricCard icon={<Users size={17} />} label="Best family pool pos." value={bestFamilyPoolRank ? `#${bestFamilyPoolRank.poolRank}` : '-'} detail={bestFamilyPoolRank?.name ?? '-'} />
       <MetricCard icon={<AlertTriangle size={17} />} label="Cut alerts" value={`${cutAlerts}`} detail="family starters" />
     </section>
   )
 }
 
-function MetricCard({ icon, label, value, detail }: { icon: React.ReactNode; label: string; value: string; detail: string }) {
+function MetricCard({ icon, label, value, detail, detailClassName }: { icon: React.ReactNode; label: string; value: string; detail: string; detailClassName?: string }) {
   return (
     <article className="metric-card">
       <span>{icon}</span>
       <p>{label}</p>
       <strong>{value}</strong>
-      <small>{detail}</small>
+      <small className={detailClassName}>{detail}</small>
     </article>
   )
 }
@@ -348,7 +348,7 @@ function FamilyEntryCard({ entry, leader }: { entry: EntryScore; leader?: EntryS
           </small>
         </div>
         <div className="entry-score">
-          <strong>{entry.totalLabel}</strong>
+          <strong className={scoreClass(entry.total)}>{entry.totalLabel}</strong>
           <small>{behindLabel(entry.familyBehind ?? entry.total - (leader?.total ?? entry.total))}</small>
         </div>
       </div>
@@ -368,7 +368,7 @@ function RosterChips({ entry }: { entry: EntryScore }) {
         <span key={`${entry.id}-${slot.name}-${slot.state}-${index}`} className={`player-chip ${slot.state}`}>
           <small>{slot.role === 'bench' ? (slot.state === 'promoted' ? 'B+' : 'B') : 'S'}</small>
           <b>{slot.name}</b>
-          <em>{slot.golfer.scoreLabel}</em>
+          <em className={scoreClass(slot.golfer.score)}>{slot.golfer.scoreLabel}</em>
         </span>
       ))}
     </div>
@@ -403,14 +403,24 @@ function DramaPanel({
         <strong>
           {topFamily
             ? tiedFamilyCount > 1
-              ? `${tiedFamilyCount} family entries are tied at ${topFamily.totalLabel}; best big-pool slot is #${poolContext?.poolRank ?? topFamily.poolRank}.`
+              ? (
+                  <>
+                    {tiedFamilyCount} family entries are tied at <span className={scoreClass(topFamily.total)}>{topFamily.totalLabel}</span>; best big-pool slot is #{poolContext?.poolRank ?? topFamily.poolRank}.
+                  </>
+                )
               : `${topFamily.name} has the house lead, sitting #${poolContext?.poolRank ?? topFamily.poolRank} in the big pool.`
             : 'Waiting for entries.'}
         </strong>
       </article>
       <article className="drama-card">
         <span><ArrowDownUp size={16} /> Pick Swing</span>
-        <strong>{bestPick ? `${bestPick.name} is carrying ${bestPick.owner} at ${bestPick.golfer.scoreLabel}.` : 'No picks yet.'}</strong>
+        <strong>
+          {bestPick ? (
+            <>
+              {bestPick.name} is carrying {bestPick.owner} at <span className={scoreClass(bestPick.golfer.score)}>{bestPick.golfer.scoreLabel}</span>.
+            </>
+          ) : 'No picks yet.'}
+        </strong>
       </article>
     </section>
   )
@@ -435,7 +445,7 @@ function OverallView({ entries }: { entries: EntryScore[] }) {
               <strong>{entry.name}</strong>
             </div>
             <span>{behindLabel(entry.poolBehind)}</span>
-            <b>{entry.totalLabel}</b>
+            <b className={scoreClass(entry.total)}>{entry.totalLabel}</b>
             <ChevronRight size={16} />
           </article>
         ))}
