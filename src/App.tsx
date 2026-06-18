@@ -481,7 +481,7 @@ function TeeTimesView({ liveScores, teeTimes }: { liveScores: GolferScore[]; tee
                 <small>{golfer?.country ?? 'U.S. Open field'}</small>
               </div>
               <span>{teeTime.teeTime}</span>
-              <b>{teeTime.startHole === 10 ? '10th tee' : '1st tee'}</b>
+              <b>{playPositionLabel(golfer, teeTime)}</b>
               <em className={scoreClass(golfer?.score ?? 0)}>{golfer?.scoreLabel ?? 'E'}</em>
             </article>
           )
@@ -489,6 +489,25 @@ function TeeTimesView({ liveScores, teeTimes }: { liveScores: GolferScore[]; tee
       </div>
     </section>
   )
+}
+
+function playPositionLabel(golfer: GolferScore | undefined, teeTime: TeeTime) {
+  const startTeeLabel = teeTime.startHole === 10 ? '10th tee' : '1st tee'
+  if (!golfer || golfer.status === 'pending') return startTeeLabel
+  if (golfer.status === 'withdrawn') return 'WD'
+  if (golfer.status === 'cut') return 'CUT'
+  if (golfer.status === 'final' || golfer.thru === 'F') return 'F'
+
+  const thru = Number(golfer.thru)
+  const completedHoles = Number.isFinite(thru) ? thru : golfer.holes.length
+  if (completedHoles >= 18) return 'F'
+
+  const startHole = golfer.startHole ?? teeTime.startHole
+  return `Hole ${nextHoleFromStart(startHole, Math.max(completedHoles, 0))}`
+}
+
+function nextHoleFromStart(startHole: TeeTime['startHole'], completedHoles: number) {
+  return ((startHole - 1 + completedHoles) % 18) + 1
 }
 
 function SectionTitle({ kicker, title, action }: { kicker: string; title: string; action?: React.ReactNode }) {
