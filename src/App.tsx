@@ -31,7 +31,7 @@ import {
   type TeeTime,
 } from './lib/scoring'
 
-type ActiveView = 'family' | 'overall' | 'tee-times' | 'rules'
+type ActiveView = 'family' | 'overall' | 'tee-times'
 
 const ESPN_EVENT_ID = '401811952'
 
@@ -93,7 +93,6 @@ function App() {
         )}
         {activeView === 'overall' && <OverallView entries={overallEntries} />}
         {activeView === 'tee-times' && <TeeTimesView liveScores={liveScores} teeTimes={teeTimes} />}
-        {activeView === 'rules' && <RulesView />}
       </section>
     </main>
   )
@@ -319,7 +318,6 @@ function ViewTabs({ activeView, setActiveView }: { activeView: ActiveView; setAc
     { id: 'family', label: 'Family' },
     { id: 'overall', label: 'Overall' },
     { id: 'tee-times', label: 'Tee Times' },
-    { id: 'rules', label: 'Rules' },
   ]
 
   return (
@@ -536,22 +534,6 @@ function TeeTimesView({ liveScores, teeTimes }: { liveScores: GolferScore[]; tee
           )
         })}
       </div>
-    </section>
-  )
-}
-
-function RulesView() {
-  return (
-    <section className="scoreboard-card rules-card">
-      <SectionTitle kicker="Pool Rules" title="Bench promotion logic" />
-      <ul>
-        <li>Each entrant has four starting golfers and two bench golfers.</li>
-        <li>Lowest combined score wins the pool.</li>
-        <li>If one starter misses the cut after Friday, the first bench player is promoted.</li>
-        <li>If two starters miss the cut, both bench players are promoted.</li>
-        <li>If three starters miss the cut, that entry is out after Friday.</li>
-        <li>The app treats cut, withdrawal, and disqualification markers as unavailable roster slots.</li>
-      </ul>
     </section>
   )
 }
