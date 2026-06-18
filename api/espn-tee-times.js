@@ -12,26 +12,44 @@ function parseTeeTimes(html) {
     .split('\n')
     .map((line) => line.trim())
     .filter(Boolean)
-  const start = lines.findIndex((line) => line === 'Tournament Field')
-  const end = lines.findIndex((line, index) => index > start && line === 'Glossary')
-  if (start < 0 || end < 0) return []
-
-  const rows = lines.slice(start, end)
+  const rows = lines
   const teeTimes = []
-  for (let index = 0; index < rows.length - 1; index += 1) {
-    const name = rows[index]
-    const time = rows[index + 1]
+  const seen = new Set()
+
+  for (let index = 0; index < rows.length; index += 1) {
+    const time = rows[index]
     if (!/^\d{1,2}:\d{2}\s[AP]M\*?$/i.test(time)) continue
-    if (['Auto Update:', 'On', 'PLAYER', 'TEE TIME'].includes(name)) continue
+
+    const name = findGolferNameBeforeTime(rows, index)
+    if (!name) continue
+
+    const normalizedName = name.replace(/\s*\(a\)$/i, '')
+    if (seen.has(normalizedName.toLowerCase())) continue
+    seen.add(normalizedName.toLowerCase())
 
     teeTimes.push({
-      name: name.replace(/\s*\(a\)$/i, ''),
+      name: normalizedName,
       teeTime: time.replace('*', ''),
       startHole: time.includes('*') ? 10 : 1,
     })
-    index += 1
   }
   return teeTimes
+}
+
+function findGolferNameBeforeTime(rows, timeIndex) {
+  for (let offset = 1; offset <= 8; offset += 1) {
+    const candidate = rows[timeIndex - offset]
+    if (isLikelyGolferName(candidate)) return candidate
+  }
+  return null
+}
+
+function isLikelyGolferName(value) {
+  if (!value) return false
+  if (['Auto Update:', 'On', 'PLAYER', 'TEE TIME', 'Leaderboard', 'Round 1'].includes(value)) return false
+  if (/^\d{1,2}:\d{2}\s[AP]M\*?$/i.test(value)) return false
+  if (/^(?:-|--|E|F|WD|CUT|T?\d+\*?|[+-]\d+)$/i.test(value)) return false
+  return /[A-Za-zÀ-ÖØ-öø-ÿ]/.test(value)
 }
 
 export default async function handler(_request, response) {

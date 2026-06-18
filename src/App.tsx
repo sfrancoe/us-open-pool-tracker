@@ -124,11 +124,11 @@ function useTournamentData() {
         const contentType = teeTimesResponse.value.headers.get('content-type') ?? ''
         if (contentType.includes('application/json')) {
           const data = await teeTimesResponse.value.json()
-          if (Array.isArray(data.teeTimes) && data.teeTimes.length) nextTeeTimes = data.teeTimes
+          if (Array.isArray(data.teeTimes) && data.teeTimes.length) nextTeeTimes = mergeTeeTimes(staticTeeTimes, data.teeTimes)
         } else {
           const html = await teeTimesResponse.value.text()
           const parsed = parseEspnTeeTimesFromHtml(html)
-          if (parsed.length) nextTeeTimes = parsed
+          if (parsed.length) nextTeeTimes = mergeTeeTimes(staticTeeTimes, parsed)
         }
       }
 
@@ -171,6 +171,16 @@ function useTournamentData() {
   return { event, liveScores, teeTimes, updatedAt, isLoading, isRefreshing, error, refreshScores: load }
 }
 
+function mergeTeeTimes(fallbackTeeTimes: TeeTime[], updatedTeeTimes: TeeTime[]) {
+  const updatesByName = new Map(updatedTeeTimes.map((teeTime) => [normalizeName(teeTime.name), teeTime]))
+  const fallbackNames = new Set(fallbackTeeTimes.map((teeTime) => normalizeName(teeTime.name)))
+
+  return [
+    ...fallbackTeeTimes.map((teeTime) => updatesByName.get(normalizeName(teeTime.name)) ?? teeTime),
+    ...updatedTeeTimes.filter((teeTime) => !fallbackNames.has(normalizeName(teeTime.name))),
+  ]
+}
+
 function parseEspnTeeTimesFromHtml(html: string): TeeTime[] {
   const text = html
     .replace(/<script[\s\S]*?<\/script>/gi, '')
@@ -183,26 +193,44 @@ function parseEspnTeeTimesFromHtml(html: string): TeeTime[] {
     .split('\n')
     .map((line) => line.trim())
     .filter(Boolean)
-  const start = lines.findIndex((line) => line === 'Tournament Field')
-  const end = lines.findIndex((line, index) => index > start && line === 'Glossary')
-  if (start < 0 || end < 0) return []
-
-  const rows = lines.slice(start, end)
+  const rows = lines
   const teeTimes: TeeTime[] = []
-  for (let index = 0; index < rows.length - 1; index += 1) {
-    const name = rows[index]
-    const time = rows[index + 1]
+  const seen = new Set<string>()
+
+  for (let index = 0; index < rows.length; index += 1) {
+    const time = rows[index]
     if (!/^\d{1,2}:\d{2}\s[AP]M\*?$/i.test(time)) continue
-    if (['Auto Update:', 'On', 'PLAYER', 'TEE TIME'].includes(name)) continue
+
+    const name = findGolferNameBeforeTime(rows, index)
+    if (!name) continue
+
+    const normalizedName = name.replace(/\s*\(a\)$/i, '')
+    if (seen.has(normalizedName.toLowerCase())) continue
+    seen.add(normalizedName.toLowerCase())
 
     teeTimes.push({
-      name: name.replace(/\s*\(a\)$/i, ''),
+      name: normalizedName,
       teeTime: time.replace('*', ''),
       startHole: time.includes('*') ? 10 : 1,
     })
-    index += 1
   }
   return teeTimes
+}
+
+function findGolferNameBeforeTime(rows: string[], timeIndex: number) {
+  for (let offset = 1; offset <= 8; offset += 1) {
+    const candidate = rows[timeIndex - offset]
+    if (isLikelyGolferName(candidate)) return candidate
+  }
+  return null
+}
+
+function isLikelyGolferName(value?: string) {
+  if (!value) return false
+  if (['Auto Update:', 'On', 'PLAYER', 'TEE TIME', 'Leaderboard', 'Round 1'].includes(value)) return false
+  if (/^\d{1,2}:\d{2}\s[AP]M\*?$/i.test(value)) return false
+  if (/^(?:-|--|E|F|WD|CUT|T?\d+\*?|[+-]\d+)$/i.test(value)) return false
+  return /[A-Za-zÀ-ÖØ-öø-ÿ]/.test(value)
 }
 
 function Header({
