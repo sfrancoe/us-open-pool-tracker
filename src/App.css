@@ -474,6 +474,10 @@
   grid-template-columns: 22px minmax(0, 1fr) 76px;
 }
 
+.player-chip.with-scores {
+  grid-template-columns: 22px minmax(0, 1fr) 34px 76px;
+}
+
 .player-chip.with-position em {
   display: grid;
   grid-template-columns: 25px minmax(0, 1fr);
@@ -557,8 +561,52 @@
   margin-top: 0;
 }
 
+.roster-grid.with-scores {
+  grid-template-columns: 1fr;
+}
+
+.roster-score-header {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) 34px 76px;
+  align-items: center;
+  gap: 5px;
+  padding: 0 6px;
+  color: #8a7640;
+  font-size: 0.61rem;
+  font-weight: 940;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.roster-score-header span:first-child {
+  grid-column: 3;
+  text-align: right;
+}
+
+.roster-score-header span:last-child {
+  grid-column: 4;
+  text-align: right;
+}
+
 .tee-row {
-  grid-template-columns: minmax(0, 1fr) 104px;
+  grid-template-columns: minmax(0, 1fr) 42px 104px;
+}
+
+.tee-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 42px 104px;
+  align-items: center;
+  gap: 8px;
+  color: #8a7640;
+  font-size: 0.63rem;
+  font-weight: 940;
+  letter-spacing: 0.06em;
+  margin: 0 10px 5px;
+  text-transform: uppercase;
+}
+
+.tee-header span {
+  text-align: right;
 }
 
 .tee-row em {
@@ -573,6 +621,14 @@
 
 .tee-row em span {
   text-align: right;
+}
+
+.today-score {
+  color: #17231d;
+  font-size: 0.82rem;
+  font-weight: 950;
+  text-align: right;
+  white-space: nowrap;
 }
 
 .tee-row em small {
@@ -705,10 +761,22 @@
     grid-template-columns: 30px minmax(0, 1fr) 58px 48px;
   }
 
+  .tee-header {
+    grid-template-columns: minmax(0, 1fr) 38px 96px;
+    gap: 6px;
+    margin: 0 8px 5px;
+  }
+
   .tee-row {
-    grid-template-columns: minmax(0, 1fr) 104px;
+    grid-template-columns: minmax(0, 1fr) 38px 96px;
     gap: 6px;
     padding: 9px 8px;
+  }
+
+  .tee-row em {
+    width: 96px;
+    grid-template-columns: 34px minmax(0, 1fr);
+    column-gap: 5px;
   }
 }
 
@@ -721,11 +789,14 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .tee-header,
   .tee-row {
-    grid-template-columns: minmax(0, 1fr) 58px 48px;
+    grid-template-columns: minmax(0, 1fr) 34px 88px;
   }
 
   .tee-row em {
-    display: none;
+    width: 88px;
+    grid-template-columns: 30px minmax(0, 1fr);
+    column-gap: 4px;
   }
 }

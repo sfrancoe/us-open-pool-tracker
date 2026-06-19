@@ -58,6 +58,7 @@ function App() {
   const bestFamilyPoolRank = [...familyEntries].sort((a, b) => a.poolRank - b.poolRank)[0]
   const familyLeaderCount = familyEntries.filter((entry) => entry.total === familyLeader?.total).length
   const poolLeaderCount = overallEntries.filter((entry) => entry.total === poolLeader?.total).length
+  const currentRound = useMemo(() => currentRoundDay(liveScores), [liveScores])
 
   return (
     <main className="app-shell">
@@ -83,10 +84,11 @@ function App() {
           <FamilyView
             entries={familyEntries}
             overallEntries={overallEntries}
+            currentRound={currentRound}
           />
         )}
-        {activeView === 'overall' && <OverallView entries={overallEntries} />}
-        {activeView === 'tee-times' && <TeeTimesView liveScores={liveScores} teeTimes={teeTimes} />}
+        {activeView === 'overall' && <OverallView entries={overallEntries} currentRound={currentRound} />}
+        {activeView === 'tee-times' && <TeeTimesView liveScores={liveScores} teeTimes={teeTimes} currentRound={currentRound} />}
       </section>
     </main>
   )
@@ -342,9 +344,11 @@ function ViewTabs({ activeView, setActiveView }: { activeView: ActiveView; setAc
 function FamilyView({
   entries,
   overallEntries,
+  currentRound,
 }: {
   entries: EntryScore[]
   overallEntries: EntryScore[]
+  currentRound: number
 }) {
   return (
     <div className="view-stack">
@@ -352,7 +356,7 @@ function FamilyView({
       <section className="scoreboard-card">
         <div className="entry-list family-list">
           {entries.map((entry) => (
-            <FamilyEntryCard key={entry.id} entry={entry} leader={entries[0]} />
+            <FamilyEntryCard key={entry.id} entry={entry} leader={entries[0]} currentRound={currentRound} />
           ))}
         </div>
       </section>
@@ -360,7 +364,7 @@ function FamilyView({
   )
 }
 
-function FamilyEntryCard({ entry, leader }: { entry: EntryScore; leader?: EntryScore }) {
+function FamilyEntryCard({ entry, leader, currentRound }: { entry: EntryScore; leader?: EntryScore; currentRound: number }) {
   return (
     <article className={`entry-card ${entry.familyRank === 1 ? 'leader' : ''} ${entry.eliminated ? 'eliminated' : ''}`}>
       <div className="entry-topline">
@@ -376,28 +380,36 @@ function FamilyEntryCard({ entry, leader }: { entry: EntryScore; leader?: EntryS
           <small>{behindLabel(entry.familyBehind ?? entry.total - (leader?.total ?? entry.total))}</small>
         </div>
       </div>
-      <RosterChips entry={entry} showPosition />
+      <RosterChips entry={entry} currentRound={currentRound} showPosition />
     </article>
   )
 }
 
-function RosterChips({ entry, showPosition = false }: { entry: EntryScore; showPosition?: boolean }) {
+function RosterChips({ entry, currentRound, showPosition = false }: { entry: EntryScore; currentRound: number; showPosition?: boolean }) {
   return (
-    <div className="roster-grid">
-      {entry.roster.map((slot, index) => (
-        <span key={`${entry.id}-${slot.name}-${slot.state}-${index}`} className={`player-chip ${slot.state} ${showPosition ? 'with-position' : ''}`}>
-          <small>{slot.role === 'bench' ? (slot.state === 'promoted' ? 'B+' : 'B') : 'S'}</small>
-          <b>{slot.name}</b>
-          {showPosition ? (
-            <em className={scoreClass(slot.golfer.score)}>
-              <span>{slot.golfer.scoreLabel}</span>
-              <small>({playPositionLabel(slot.golfer)})</small>
-            </em>
-          ) : (
-            <em className={scoreClass(slot.golfer.score)}>{slot.golfer.scoreLabel}</em>
-          )}
-        </span>
-      ))}
+    <div className="roster-grid with-scores">
+      <div className="roster-score-header" aria-hidden="true">
+        <span>Today</span>
+        <span>Total</span>
+      </div>
+      {entry.roster.map((slot, index) => {
+        const today = todayScore(slot.golfer, currentRound)
+        return (
+          <span key={`${entry.id}-${slot.name}-${slot.state}-${index}`} className={`player-chip with-scores ${slot.state} ${showPosition ? 'with-position' : ''}`}>
+            <small>{slot.role === 'bench' ? (slot.state === 'promoted' ? 'B+' : 'B') : 'S'}</small>
+            <b>{slot.name}</b>
+            <span className={`today-score ${today.score === null ? '' : scoreClass(today.score)}`}>{today.label}</span>
+            {showPosition ? (
+              <em className={scoreClass(slot.golfer.score)}>
+                <span>{slot.golfer.scoreLabel}</span>
+                <small>({playPositionLabel(slot.golfer)})</small>
+              </em>
+            ) : (
+              <em className={scoreClass(slot.golfer.score)}>{slot.golfer.scoreLabel}</em>
+            )}
+          </span>
+        )
+      })}
     </div>
   )
 }
@@ -445,7 +457,7 @@ function DramaPanel({
   )
 }
 
-function OverallView({ entries }: { entries: EntryScore[] }) {
+function OverallView({ entries, currentRound }: { entries: EntryScore[]; currentRound: number }) {
   const [query, setQuery] = useState('')
   const [expandedEntryId, setExpandedEntryId] = useState<string | null>(null)
   const filtered = entries.filter((entry) => entry.name.toLowerCase().includes(query.toLowerCase()))
@@ -480,7 +492,7 @@ function OverallView({ entries }: { entries: EntryScore[] }) {
               </button>
               {isExpanded && (
                 <div id={picksId} className="overall-picks">
-                  <RosterChips entry={entry} />
+                  <RosterChips entry={entry} currentRound={currentRound} />
                 </div>
               )}
             </article>
@@ -491,7 +503,7 @@ function OverallView({ entries }: { entries: EntryScore[] }) {
   )
 }
 
-function TeeTimesView({ liveScores, teeTimes }: { liveScores: GolferScore[]; teeTimes: TeeTime[] }) {
+function TeeTimesView({ liveScores, teeTimes, currentRound }: { liveScores: GolferScore[]; teeTimes: TeeTime[]; currentRound: number }) {
   const [query, setQuery] = useState('')
   const golferMap = buildGolferMap(liveScores, staticTeeTimes)
   const rows = teeTimes
@@ -517,15 +529,22 @@ function TeeTimesView({ liveScores, teeTimes }: { liveScores: GolferScore[]; tee
         <Search size={16} />
         <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search golfers" />
       </label>
+      <div className="tee-header" aria-hidden="true">
+        <span />
+        <span>Today</span>
+        <span>Total</span>
+      </div>
       <div className="tee-list">
         {rows.map((teeTime) => {
           const golfer = golferMap.get(normalizeName(teeTime.name))
+          const today = todayScore(golfer, currentRound)
           return (
             <article key={`${teeTime.name}-${teeTime.teeTime}-${teeTime.startHole}`} className="tee-row">
               <div>
                 <strong>{teeTime.name}</strong>
                 <small>{golfer?.country ?? 'U.S. Open field'}</small>
               </div>
+              <strong className={`today-score ${today.score === null ? '' : scoreClass(today.score)}`}>{today.label}</strong>
               <em className={scoreClass(golfer?.score ?? 0)}>
                 <span>{golfer?.scoreLabel ?? 'E'}</span>
                 <small>({playPositionLabel(golfer, teeTime)})</small>
@@ -536,6 +555,19 @@ function TeeTimesView({ liveScores, teeTimes }: { liveScores: GolferScore[]; tee
       </div>
     </section>
   )
+}
+
+function currentRoundDay(golfers: GolferScore[]) {
+  return golfers.reduce((round, golfer) => {
+    const latestRound = golfer.rounds.reduce((latest, score) => score.available ? Math.max(latest, score.day) : latest, 1)
+    return Math.max(round, latestRound)
+  }, 1)
+}
+
+function todayScore(golfer: GolferScore | undefined, currentRound: number) {
+  const round = golfer?.rounds.find((score) => score.day === currentRound)
+  if (!round?.available || round.score === null) return { label: '-', score: null }
+  return { label: round.scoreLabel, score: round.score }
 }
 
 function playPositionLabel(golfer: GolferScore | undefined, teeTime?: TeeTime) {
