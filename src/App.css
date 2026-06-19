@@ -468,6 +468,7 @@
   font-style: normal;
   font-weight: 950;
   text-align: right;
+  white-space: nowrap;
 }
 
 .player-chip.with-scores {
@@ -572,6 +573,11 @@
 
 .tee-row {
   grid-template-columns: minmax(0, 1fr) 42px 58px 44px;
+}
+
+.tee-row em {
+  text-align: right;
+  white-space: nowrap;
 }
 
 .tee-header {
