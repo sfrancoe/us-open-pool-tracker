@@ -380,33 +380,28 @@ function FamilyEntryCard({ entry, leader, currentRound }: { entry: EntryScore; l
           <small>{behindLabel(entry.familyBehind ?? entry.total - (leader?.total ?? entry.total))}</small>
         </div>
       </div>
-      <RosterChips entry={entry} currentRound={currentRound} showPosition />
+      <RosterChips entry={entry} currentRound={currentRound} />
     </article>
   )
 }
 
-function RosterChips({ entry, currentRound, showPosition = false }: { entry: EntryScore; currentRound: number; showPosition?: boolean }) {
+function RosterChips({ entry, currentRound }: { entry: EntryScore; currentRound: number }) {
   return (
     <div className="roster-grid with-scores">
       <div className="roster-score-header" aria-hidden="true">
         <span>Today</span>
+        <span>Hole</span>
         <span>Total</span>
       </div>
       {entry.roster.map((slot, index) => {
         const today = todayScore(slot.golfer, currentRound)
         return (
-          <span key={`${entry.id}-${slot.name}-${slot.state}-${index}`} className={`player-chip with-scores ${slot.state} ${showPosition ? 'with-position' : ''}`}>
+          <span key={`${entry.id}-${slot.name}-${slot.state}-${index}`} className={`player-chip with-scores ${slot.state}`}>
             <small>{slot.role === 'bench' ? (slot.state === 'promoted' ? 'B+' : 'B') : 'S'}</small>
             <b>{slot.name}</b>
             <span className={`today-score ${today.score === null ? '' : scoreClass(today.score)}`}>{today.label}</span>
-            {showPosition ? (
-              <em className={scoreClass(slot.golfer.score)}>
-                <span>{slot.golfer.scoreLabel}</span>
-                <small>({playPositionLabel(slot.golfer)})</small>
-              </em>
-            ) : (
-              <em className={scoreClass(slot.golfer.score)}>{slot.golfer.scoreLabel}</em>
-            )}
+            <span className="hole-label">{playPositionLabel(slot.golfer)}</span>
+            <em className={scoreClass(slot.golfer.score)}>{slot.golfer.scoreLabel}</em>
           </span>
         )
       })}
@@ -532,6 +527,7 @@ function TeeTimesView({ liveScores, teeTimes, currentRound }: { liveScores: Golf
       <div className="tee-header" aria-hidden="true">
         <span />
         <span>Today</span>
+        <span>Hole</span>
         <span>Total</span>
       </div>
       <div className="tee-list">
@@ -545,10 +541,8 @@ function TeeTimesView({ liveScores, teeTimes, currentRound }: { liveScores: Golf
                 <small>{golfer?.country ?? 'U.S. Open field'}</small>
               </div>
               <strong className={`today-score ${today.score === null ? '' : scoreClass(today.score)}`}>{today.label}</strong>
-              <em className={scoreClass(golfer?.score ?? 0)}>
-                <span>{golfer?.scoreLabel ?? 'E'}</span>
-                <small>({playPositionLabel(golfer, teeTime)})</small>
-              </em>
+              <span className="hole-label">{playPositionLabel(golfer, teeTime)}</span>
+              <em className={scoreClass(golfer?.score ?? 0)}>{golfer?.scoreLabel ?? 'E'}</em>
             </article>
           )
         })}
