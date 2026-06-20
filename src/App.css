@@ -150,8 +150,7 @@
   box-sizing: border-box;
 }
 
-.scoreboard-card,
-.drama-card {
+.scoreboard-card {
   border: 1px solid #e2d7bd;
   border-radius: 8px;
   background: #fffaf0;
@@ -168,8 +167,7 @@
 
 .entry-score small,
 .overall-row small,
-.tee-row small,
-.drama-card span {
+.tee-row small {
   color: #7a705e;
   font-size: 0.68rem;
   font-weight: 850;
@@ -237,39 +235,6 @@
 
 .section-title h3 {
   font-size: 1.05rem;
-}
-
-.drama-panel {
-  display: grid;
-  grid-template-columns: 1.1fr repeat(3, minmax(0, 1fr));
-  gap: 8px;
-}
-
-.drama-card {
-  min-height: 88px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 12px;
-}
-
-.drama-card.feature {
-  background: linear-gradient(180deg, #fff3cf, #fffaf0);
-  border-color: #d7b85d;
-}
-
-.drama-card span {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  text-transform: uppercase;
-}
-
-.drama-card strong {
-  color: #17231d;
-  font-size: 0.88rem;
-  font-weight: 930;
-  line-height: 1.2;
 }
 
 .entry-list,
@@ -657,12 +622,6 @@
 
 .search-box input::placeholder {
   color: #8b816e;
-}
-
-@media (max-width: 860px) {
-  .drama-panel {
-    grid-template-columns: 1fr;
-  }
 }
 
 @media (max-width: 620px) {

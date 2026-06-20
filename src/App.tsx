@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
-  ArrowDownUp,
-  Flame,
   RefreshCw,
   Search,
   Shield,
@@ -67,7 +65,6 @@ function App() {
         {activeView === 'family' && (
           <FamilyView
             entries={familyEntries}
-            overallEntries={overallEntries}
             currentRound={currentRound}
           />
         )}
@@ -289,16 +286,13 @@ function ViewTabs({ activeView, setActiveView }: { activeView: ActiveView; setAc
 
 function FamilyView({
   entries,
-  overallEntries,
   currentRound,
 }: {
   entries: EntryScore[]
-  overallEntries: EntryScore[]
   currentRound: number
 }) {
   return (
     <div className="view-stack">
-      <DramaPanel entries={entries} overallEntries={overallEntries} />
       <section className="scoreboard-card">
         <div className="entry-list family-list">
           {entries.map((entry) => (
@@ -358,49 +352,6 @@ function RosterChips({ entry, currentRound }: { entry: EntryScore; currentRound:
         </div>
       )}
     </div>
-  )
-}
-
-function DramaPanel({
-  entries,
-  overallEntries,
-}: {
-  entries: EntryScore[]
-  overallEntries: EntryScore[]
-}) {
-  const bestPick = [...entries.flatMap((entry) => entry.roster.map((slot) => ({ ...slot, owner: entry.name })))]
-    .sort((a, b) => a.golfer.score - b.golfer.score)[0]
-  const topFamily = entries[0]
-  const tiedFamilyCount = entries.filter((entry) => entry.total === topFamily?.total).length
-  const poolContext = topFamily ? overallEntries.find((entry) => entry.id === topFamily.id) : undefined
-
-  return (
-    <section className="drama-panel">
-      <article className="drama-card feature">
-        <span><Flame size={16} /> Family Drama</span>
-        <strong>
-          {topFamily
-            ? tiedFamilyCount > 1
-              ? (
-                  <>
-                    {tiedFamilyCount} family entries are tied at <span className={scoreClass(topFamily.total)}>{topFamily.totalLabel}</span>; best big-pool slot is #{poolContext?.poolRank ?? topFamily.poolRank}.
-                  </>
-                )
-              : `${topFamily.name} has the house lead, sitting #${poolContext?.poolRank ?? topFamily.poolRank} in the big pool.`
-            : 'Waiting for entries.'}
-        </strong>
-      </article>
-      <article className="drama-card">
-        <span><ArrowDownUp size={16} /> Pick Swing</span>
-        <strong>
-          {bestPick ? (
-            <>
-              {bestPick.name} is carrying {bestPick.owner} at <span className={scoreClass(bestPick.golfer.score)}>{bestPick.golfer.scoreLabel}</span>.
-            </>
-          ) : 'No picks yet.'}
-        </strong>
-      </article>
-    </section>
   )
 }
 
