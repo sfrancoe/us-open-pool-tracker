@@ -151,8 +151,7 @@
 }
 
 .scoreboard-card,
-.drama-card,
-.metric-card {
+.drama-card {
   border: 1px solid #e2d7bd;
   border-radius: 8px;
   background: #fffaf0;
@@ -167,38 +166,6 @@
   letter-spacing: 0;
 }
 
-.hero-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-}
-
-.summary-grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
-.metric-card {
-  min-height: 72px;
-  display: grid;
-  grid-template-columns: 26px minmax(0, 1fr);
-  grid-template-rows: auto auto auto;
-  column-gap: 8px;
-  align-content: center;
-  padding: 12px;
-}
-
-.metric-card > span {
-  width: 26px;
-  height: 26px;
-  grid-row: 1 / 4;
-  display: grid;
-  place-items: center;
-  border-radius: 6px;
-  background: #efe4c7;
-  color: #0c563d;
-}
-
-.metric-card p,
 .entry-score small,
 .overall-row small,
 .tee-row small,
@@ -209,33 +176,12 @@
   line-height: 1.2;
 }
 
-.metric-card strong {
-  min-width: 0;
-  overflow: hidden;
-  color: #17231d;
-  font-size: 0.95rem;
-  font-weight: 950;
-  line-height: 1.1;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.metric-card small {
-  min-width: 0;
-  overflow: hidden;
-  color: #927437;
-  font-size: 0.7rem;
-  font-weight: 880;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .view-tabs {
   position: sticky;
   top: 0;
   z-index: 10;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 4px;
   border: 1px solid rgba(226, 215, 189, 0.88);
   border-radius: 8px;
@@ -247,13 +193,18 @@
 }
 
 .view-tabs button {
-  min-height: 36px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: 0;
   border-radius: 6px;
   font: inherit;
-  font-size: 0.78rem;
-  font-weight: 900;
+  font-size: 1rem;
+  font-weight: 940;
   letter-spacing: 0;
+  line-height: 1.08;
+  text-align: center;
 }
 
 .view-tabs button {
@@ -685,10 +636,6 @@
   .drama-panel {
     grid-template-columns: 1fr;
   }
-
-  .hero-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 }
 
 @media (max-width: 620px) {
@@ -729,17 +676,9 @@
     margin-bottom: 10px;
   }
 
-  .hero-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .metric-card {
-    min-height: 66px;
-    padding: 10px;
-  }
-
   .view-tabs button {
-    font-size: 0.73rem;
+    min-height: 42px;
+    font-size: 0.88rem;
   }
 
   .scoreboard-card {
@@ -777,12 +716,8 @@
 }
 
 @media (max-width: 380px) {
-  .hero-grid {
-    grid-template-columns: 1fr;
-  }
-
   .view-tabs {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .tee-header,

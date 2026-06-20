@@ -1,14 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
-  AlertTriangle,
   ArrowDownUp,
   Flame,
-  Medal,
   RefreshCw,
   Search,
   Shield,
-  Trophy,
-  Users,
 } from 'lucide-react'
 import './App.css'
 import { poolEntries } from './data/poolEntries'
@@ -54,11 +50,6 @@ function App() {
     .filter((entry) => entry.group === 'family')
     .sort((a, b) => (a.familyRank ?? 99) - (b.familyRank ?? 99) || a.name.localeCompare(b.name))
   const overallEntries = scoredEntries
-  const familyLeader = familyEntries[0]
-  const poolLeader = overallEntries[0]
-  const bestFamilyPoolRank = [...familyEntries].sort((a, b) => a.poolRank - b.poolRank)[0]
-  const familyLeaderCount = familyEntries.filter((entry) => entry.total === familyLeader?.total).length
-  const poolLeaderCount = overallEntries.filter((entry) => entry.total === poolLeader?.total).length
   const currentRound = useMemo(() => currentRoundDay(liveScores), [liveScores])
 
   return (
@@ -73,14 +64,6 @@ function App() {
       />
       <ViewTabs activeView={activeView} setActiveView={setActiveView} />
       <section className="mobile-stage">
-        <HeroPanel
-          familyLeader={familyLeader}
-          familyLeaderCount={familyLeaderCount}
-          poolLeader={poolLeader}
-          poolLeaderCount={poolLeaderCount}
-          bestFamilyPoolRank={bestFamilyPoolRank}
-          familyEntries={familyEntries}
-        />
         {activeView === 'family' && (
           <FamilyView
             entries={familyEntries}
@@ -279,44 +262,6 @@ function Header({
 
 function formatUpdateTime(date: Date) {
   return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
-}
-
-function HeroPanel({
-  familyLeader,
-  familyLeaderCount,
-  poolLeader,
-  poolLeaderCount,
-  bestFamilyPoolRank,
-  familyEntries,
-}: {
-  familyLeader?: EntryScore
-  familyLeaderCount: number
-  poolLeader?: EntryScore
-  poolLeaderCount: number
-  bestFamilyPoolRank?: EntryScore
-  familyEntries: EntryScore[]
-}) {
-  const cutAlerts = familyEntries.reduce((sum, entry) => sum + entry.cutCount, 0)
-
-  return (
-    <section className="hero-grid summary-grid">
-      <MetricCard icon={<Trophy size={17} />} label="Family leader" value={familyLeaderCount > 1 ? `${familyLeaderCount} tied` : familyLeader?.name ?? '-'} detail={familyLeader?.totalLabel ?? '-'} detailClassName={familyLeader ? scoreClass(familyLeader.total) : undefined} />
-      <MetricCard icon={<Medal size={17} />} label="Overall leader" value={poolLeaderCount > 1 ? `${poolLeaderCount} tied` : poolLeader?.name ?? '-'} detail={poolLeader?.totalLabel ?? '-'} detailClassName={poolLeader ? scoreClass(poolLeader.total) : undefined} />
-      <MetricCard icon={<Users size={17} />} label="Best family pool pos." value={bestFamilyPoolRank ? `#${bestFamilyPoolRank.poolRank}` : '-'} detail={bestFamilyPoolRank?.name ?? '-'} />
-      <MetricCard icon={<AlertTriangle size={17} />} label="Cut alerts" value={`${cutAlerts}`} detail="family starters" />
-    </section>
-  )
-}
-
-function MetricCard({ icon, label, value, detail, detailClassName }: { icon: React.ReactNode; label: string; value: string; detail: string; detailClassName?: string }) {
-  return (
-    <article className="metric-card">
-      <span>{icon}</span>
-      <p>{label}</p>
-      <strong>{value}</strong>
-      <small className={detailClassName}>{detail}</small>
-    </article>
-  )
 }
 
 function ViewTabs({ activeView, setActiveView }: { activeView: ActiveView; setActiveView: (view: ActiveView) => void }) {
