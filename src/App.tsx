@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
+  ArrowDown,
+  ArrowUp,
+  ChevronsUpDown,
   RefreshCw,
   Search,
   Shield,
@@ -449,7 +452,10 @@ function TeeTimesView({ liveScores, teeTimes, currentRound }: { liveScores: Golf
       ? { key, direction: current.direction === 'asc' ? 'desc' : 'asc' }
       : { key, direction: 'asc' })
   }
-  const sortMarker = (key: LeaderboardSort['key']) => sort.key === key ? (sort.direction === 'asc' ? '^' : 'v') : ''
+  const sortIcon = (key: LeaderboardSort['key']) => {
+    if (sort.key !== key) return <ChevronsUpDown size={11} strokeWidth={3} />
+    return sort.direction === 'asc' ? <ArrowUp size={11} strokeWidth={3} /> : <ArrowDown size={11} strokeWidth={3} />
+  }
 
   return (
     <section className="scoreboard-card">
@@ -461,11 +467,13 @@ function TeeTimesView({ liveScores, teeTimes, currentRound }: { liveScores: Golf
       <div className="tee-header">
         <span />
         <button type="button" className={sort.key === 'today' ? 'active-sort' : ''} onClick={() => changeSort('today')}>
-          Today {sortMarker('today')}
+          <span>Today</span>
+          {sortIcon('today')}
         </button>
         <span>Hole</span>
         <button type="button" className={sort.key === 'total' ? 'active-sort' : ''} onClick={() => changeSort('total')}>
-          Total {sortMarker('total')}
+          <span>Total</span>
+          {sortIcon('total')}
         </button>
       </div>
       <div className="tee-list">

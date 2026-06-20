@@ -569,6 +569,10 @@
 
 .tee-header button {
   min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
   border: 0;
   background: transparent;
   color: inherit;
@@ -579,6 +583,12 @@
   text-align: right;
   text-transform: inherit;
   white-space: nowrap;
+}
+
+.tee-header button svg {
+  width: 11px;
+  height: 11px;
+  flex: 0 0 auto;
 }
 
 .tee-header button.active-sort {
