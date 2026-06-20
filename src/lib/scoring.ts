@@ -494,37 +494,55 @@ function golferAliases(displayName: string) {
   return normalized
 }
 
-function isCutOrUnavailable(golfer: GolferScore) {
-  return golfer.status === 'cut' || golfer.status === 'withdrawn'
+export function isPoolCut(golfer?: GolferScore) {
+  if (!golfer) return false
+  return golfer.status === 'cut' || golfer.status === 'withdrawn' || golfer.score >= 5
 }
 
-function rankEntries<T extends { total: number; name: string }>(entries: T[]) {
-  const scores = [...new Set(entries.map((entry) => entry.total).sort((a, b) => a - b))]
+function rankEntries<T extends { total: number; name: string; eliminated?: boolean }>(entries: T[]) {
+  const activeEntries = entries.filter((entry) => !entry.eliminated)
+  const activeScores = [...new Set(activeEntries.map((entry) => entry.total).sort((a, b) => a - b))]
+  const eliminatedScores = [...new Set(entries.filter((entry) => entry.eliminated).map((entry) => entry.total).sort((a, b) => a - b))]
+
   return entries
     .map((entry) => ({
       ...entry,
-      rank: scores.indexOf(entry.total) + 1,
+      rank: entry.eliminated
+        ? activeScores.length + eliminatedScores.indexOf(entry.total) + 1
+        : activeScores.indexOf(entry.total) + 1,
     }))
-    .sort((a, b) => a.rank - b.rank || a.name.localeCompare(b.name))
+    .sort((a, b) => Number(Boolean(a.eliminated)) - Number(Boolean(b.eliminated)) || a.rank - b.rank || a.name.localeCompare(b.name))
 }
 
 export function scoreEntries(entries: PoolEntry[], golferMap: Map<string, GolferScore>): EntryScore[] {
   const baseScores = entries.map((entry) => {
     const starters = entry.starters.map((name) => golferMap.get(normalizeName(name)) ?? makeFallbackGolfer(name))
     const bench = entry.bench.map((name) => golferMap.get(normalizeName(name)) ?? makeFallbackGolfer(name))
-    const cutStarters = starters.filter(isCutOrUnavailable)
-    const promotedBench = bench.slice(0, Math.min(cutStarters.length, 2))
-    const activeStarters = starters.filter((golfer) => !isCutOrUnavailable(golfer))
-    const eliminated = cutStarters.length >= 3
+    const cutStarters = starters.filter(isPoolCut)
+    const cutBench = bench.filter(isPoolCut)
+    const promotedBench = bench.filter((golfer) => !isPoolCut(golfer)).slice(0, Math.min(cutStarters.length, 2))
+    const activeStarters = starters.filter((golfer) => !isPoolCut(golfer))
+    const missedCutCount = cutStarters.length + cutBench.length
+    const eliminated = missedCutCount >= 3
     const activeGolfers = eliminated ? activeStarters : [...activeStarters, ...promotedBench].slice(0, 4)
 
+    const starterSlots = starters.map((golfer): RosterSlot => ({
+      name: golfer.displayName,
+      role: 'starter',
+      state: isPoolCut(golfer) ? 'cut' : 'counting',
+      golfer,
+    }))
+
+    const promotedNames = new Set(promotedBench.map((golfer) => normalizeName(golfer.displayName)))
+    const benchSlots = bench.map((golfer): RosterSlot => ({
+      name: golfer.displayName,
+      role: 'bench',
+      state: isPoolCut(golfer) ? 'cut' : promotedNames.has(normalizeName(golfer.displayName)) ? 'promoted' : 'bench',
+      golfer,
+    }))
+
     const activeSlots: RosterSlot[] = [
-      ...starters.map((golfer): RosterSlot => ({
-        name: golfer.displayName,
-        role: 'starter',
-        state: isCutOrUnavailable(golfer) ? 'cut' : 'counting',
-        golfer,
-      })),
+      ...starterSlots,
       ...promotedBench.map((golfer): RosterSlot => ({
         name: golfer.displayName,
         role: 'bench',
@@ -533,15 +551,8 @@ export function scoreEntries(entries: PoolEntry[], golferMap: Map<string, Golfer
       })),
     ]
 
-    const benchSlots = bench.map((golfer, index): RosterSlot => ({
-      name: golfer.displayName,
-      role: 'bench',
-      state: index < promotedBench.length ? 'promoted' : 'bench',
-      golfer,
-    }))
-
     const total = activeGolfers.reduce((sum, golfer) => sum + golfer.score, 0)
-    const roster = [...activeSlots, ...benchSlots.filter((slot) => slot.state === 'bench')]
+    const roster = [...starterSlots, ...benchSlots]
     const sortedRoster = roster.length ? [...roster].sort((a, b) => a.golfer.score - b.golfer.score) : []
 
     return {

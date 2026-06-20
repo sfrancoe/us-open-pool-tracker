@@ -17,6 +17,7 @@ import {
   behindLabel,
   buildGolferMap,
   buildTeeTimeMap,
+  isPoolCut,
   normalizeName,
   scoreEntries,
   timeToMinutes,
@@ -470,7 +471,7 @@ function OverallView({ entries, currentRound }: { entries: EntryScore[]; current
           const picksId = `overall-picks-${entry.id}`
 
           return (
-            <article key={entry.id} className={`overall-entry ${entry.group === 'family' ? 'family' : ''}`}>
+            <article key={entry.id} className={`overall-entry ${entry.group === 'family' ? 'family' : ''} ${entry.eliminated ? 'eliminated' : ''}`}>
               <button
                 type="button"
                 className="overall-row"
@@ -535,7 +536,7 @@ function TeeTimesView({ liveScores, teeTimes, currentRound }: { liveScores: Golf
           const golfer = golferMap.get(normalizeName(teeTime.name))
           const today = todayScore(golfer, currentRound)
           return (
-            <article key={`${teeTime.name}-${teeTime.teeTime}-${teeTime.startHole}`} className="tee-row">
+            <article key={`${teeTime.name}-${teeTime.teeTime}-${teeTime.startHole}`} className={`tee-row ${isPoolCut(golfer) ? 'cut' : ''}`}>
               <div>
                 <strong>{teeTime.name}</strong>
                 <small>{golfer?.country ?? 'U.S. Open field'}</small>

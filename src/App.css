@@ -340,6 +340,15 @@
   background: #fff8df;
 }
 
+.overall-entry.eliminated {
+  opacity: 0.68;
+}
+
+.overall-entry.eliminated .overall-row {
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+}
+
 .entry-card {
   border: 1px solid #ece2ca;
   border-radius: 8px;
@@ -353,7 +362,12 @@
 }
 
 .entry-card.eliminated {
-  opacity: 0.78;
+  opacity: 0.68;
+}
+
+.entry-card.eliminated .entry-topline {
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
 }
 
 .entry-topline {
@@ -489,6 +503,19 @@
 .player-chip.unavailable {
   background: #f8e9e2;
   border-color: #e2b8a8;
+}
+
+.player-chip.cut b,
+.player-chip.cut .today-score,
+.player-chip.cut .hole-label,
+.player-chip.cut em,
+.player-chip.unavailable b,
+.player-chip.unavailable .today-score,
+.player-chip.unavailable .hole-label,
+.player-chip.unavailable em,
+.tee-row.cut {
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
 }
 
 .player-chip.cut small,
