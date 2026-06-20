@@ -23,6 +23,10 @@ import {
 } from './lib/scoring'
 
 type ActiveView = 'family' | 'overall' | 'tee-times'
+type LeaderboardSort = {
+  key: 'today' | 'total'
+  direction: 'asc' | 'desc'
+}
 
 const ESPN_EVENT_ID = '401811952'
 
@@ -403,7 +407,9 @@ function OverallView({ entries, currentRound }: { entries: EntryScore[]; current
 
 function TeeTimesView({ liveScores, teeTimes, currentRound }: { liveScores: GolferScore[]; teeTimes: TeeTime[]; currentRound: number }) {
   const [query, setQuery] = useState('')
+  const [sort, setSort] = useState<LeaderboardSort>({ key: 'total', direction: 'asc' })
   const golferMap = buildGolferMap(liveScores, staticTeeTimes)
+  const sortMultiplier = sort.direction === 'asc' ? 1 : -1
   const rows = teeTimes
     .filter((teeTime) => teeTime.name.toLowerCase().includes(query.toLowerCase()))
     .sort((a, b) => {
@@ -411,14 +417,39 @@ function TeeTimesView({ liveScores, teeTimes, currentRound }: { liveScores: Golf
       const golferB = golferMap.get(normalizeName(b.name))
       const cutA = isPoolCut(golferA) ? 1 : 0
       const cutB = isPoolCut(golferB) ? 1 : 0
+      const totalSort = ((golferA?.score ?? 0) - (golferB?.score ?? 0)) * sortMultiplier
+
+      if (sort.key === 'today') {
+        const todayA = currentRoundScore(golferA, currentRound)
+        const todayB = currentRoundScore(golferB, currentRound)
+        const notStartedA = todayA.started ? 0 : 1
+        const notStartedB = todayB.started ? 0 : 1
+
+        return (
+          cutA - cutB ||
+          notStartedA - notStartedB ||
+          (todayA.score - todayB.score) * sortMultiplier ||
+          totalSort ||
+          (golferA?.place ?? 999) - (golferB?.place ?? 999) ||
+          timeToMinutes(a.teeTime) - timeToMinutes(b.teeTime) ||
+          a.name.localeCompare(b.name)
+        )
+      }
+
       return (
         cutA - cutB ||
-        (golferA?.score ?? 0) - (golferB?.score ?? 0) ||
+        totalSort ||
         (golferA?.place ?? 999) - (golferB?.place ?? 999) ||
         timeToMinutes(a.teeTime) - timeToMinutes(b.teeTime) ||
         a.name.localeCompare(b.name)
       )
     })
+  const changeSort = (key: LeaderboardSort['key']) => {
+    setSort((current) => current.key === key
+      ? { key, direction: current.direction === 'asc' ? 'desc' : 'asc' }
+      : { key, direction: 'asc' })
+  }
+  const sortMarker = (key: LeaderboardSort['key']) => sort.key === key ? (sort.direction === 'asc' ? '^' : 'v') : ''
 
   return (
     <section className="scoreboard-card">
@@ -427,11 +458,15 @@ function TeeTimesView({ liveScores, teeTimes, currentRound }: { liveScores: Golf
         <Search size={16} />
         <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search golfers" />
       </label>
-      <div className="tee-header" aria-hidden="true">
+      <div className="tee-header">
         <span />
-        <span>Today</span>
+        <button type="button" className={sort.key === 'today' ? 'active-sort' : ''} onClick={() => changeSort('today')}>
+          Today {sortMarker('today')}
+        </button>
         <span>Hole</span>
-        <span>Total</span>
+        <button type="button" className={sort.key === 'total' ? 'active-sort' : ''} onClick={() => changeSort('total')}>
+          Total {sortMarker('total')}
+        </button>
       </div>
       <div className="tee-list">
         {rows.map((teeTime) => {
@@ -452,6 +487,20 @@ function TeeTimesView({ liveScores, teeTimes, currentRound }: { liveScores: Golf
       </div>
     </section>
   )
+}
+
+function currentRoundScore(golfer: GolferScore | undefined, currentRound: number) {
+  const round = golfer?.rounds.find((score) => score.day === currentRound)
+  if (!round?.available) return { started: false, score: 0 }
+
+  const thru = Number(round.thru)
+  const completedHoles = Number.isFinite(thru) ? thru : round.holes.length
+  const started = round.score !== null || completedHoles > 0
+
+  return {
+    started,
+    score: round.score ?? 0,
+  }
 }
 
 function currentRoundDay(golfers: GolferScore[]) {

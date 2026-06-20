@@ -567,6 +567,24 @@
   text-align: right;
 }
 
+.tee-header button {
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  letter-spacing: inherit;
+  padding: 0;
+  text-align: right;
+  text-transform: inherit;
+  white-space: nowrap;
+}
+
+.tee-header button.active-sort {
+  color: #0b4f39;
+}
+
 .today-score {
   color: #17231d;
   font-size: 0.82rem;
