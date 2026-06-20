@@ -409,10 +409,13 @@ function TeeTimesView({ liveScores, teeTimes, currentRound }: { liveScores: Golf
     .sort((a, b) => {
       const golferA = golferMap.get(normalizeName(a.name))
       const golferB = golferMap.get(normalizeName(b.name))
-      const pendingA = !golferA || golferA.status === 'pending' ? 1 : 0
-      const pendingB = !golferB || golferB.status === 'pending' ? 1 : 0
+      const cutA = isPoolCut(golferA) ? 1 : 0
+      const cutB = isPoolCut(golferB) ? 1 : 0
+      const startedA = cutA ? 0 : hasStartedRound(golferA, currentRound) ? 0 : 1
+      const startedB = cutB ? 0 : hasStartedRound(golferB, currentRound) ? 0 : 1
       return (
-        pendingA - pendingB ||
+        cutA - cutB ||
+        startedA - startedB ||
         (golferA?.score ?? 0) - (golferB?.score ?? 0) ||
         (golferA?.place ?? 999) - (golferB?.place ?? 999) ||
         timeToMinutes(a.teeTime) - timeToMinutes(b.teeTime) ||
@@ -452,6 +455,14 @@ function TeeTimesView({ liveScores, teeTimes, currentRound }: { liveScores: Golf
       </div>
     </section>
   )
+}
+
+function hasStartedRound(golfer: GolferScore | undefined, currentRound: number) {
+  const round = golfer?.rounds.find((score) => score.day === currentRound)
+  if (!round?.available) return false
+  const thru = Number(round.thru)
+  const completedHoles = Number.isFinite(thru) ? thru : round.holes.length
+  return round.score !== null || completedHoles > 0
 }
 
 function currentRoundDay(golfers: GolferScore[]) {
