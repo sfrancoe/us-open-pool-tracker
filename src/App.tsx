@@ -351,6 +351,12 @@ function RosterChips({ entry, currentRound }: { entry: EntryScore; currentRound:
           </span>
         )
       })}
+      {entry.penaltyStrokes > 0 && (
+        <div className="penalty-row">
+          <span>Bench penalty</span>
+          <b className="over">+{entry.penaltyStrokes}</b>
+        </div>
+      )}
     </div>
   )
 }

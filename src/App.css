@@ -440,6 +440,33 @@
   grid-template-columns: 22px minmax(0, 1fr) 34px 54px 38px;
 }
 
+.penalty-row {
+  min-height: 28px;
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) 34px 54px 38px;
+  align-items: center;
+  gap: 5px;
+  border: 1px dashed #d9cba7;
+  border-radius: 6px;
+  background: #fff8df;
+  padding: 4px 6px;
+}
+
+.penalty-row span {
+  grid-column: 2 / 5;
+  color: #7a705e;
+  font-size: 0.7rem;
+  font-weight: 880;
+}
+
+.penalty-row b {
+  color: #17231d;
+  font-size: 0.76rem;
+  font-weight: 950;
+  text-align: right;
+  white-space: nowrap;
+}
+
 .player-chip.bench small {
   background: #c8b579;
   color: #17231d;

@@ -153,6 +153,7 @@ export type EntryScore = PoolEntry & {
   eliminated: boolean
   cutCount: number
   promotedCount: number
+  penaltyStrokes: number
   activeSlots: RosterSlot[]
   benchSlots: RosterSlot[]
   roster: RosterSlot[]
@@ -551,7 +552,9 @@ export function scoreEntries(entries: PoolEntry[], golferMap: Map<string, Golfer
       })),
     ]
 
-    const total = activeGolfers.reduce((sum, golfer) => sum + golfer.score, 0)
+    const penaltyStrokes = promotedBench.length
+    const golferTotal = activeGolfers.reduce((sum, golfer) => sum + golfer.score, 0)
+    const total = golferTotal + penaltyStrokes
     const roster = [...starterSlots, ...benchSlots]
     const sortedRoster = roster.length ? [...roster].sort((a, b) => a.golfer.score - b.golfer.score) : []
 
@@ -565,6 +568,7 @@ export function scoreEntries(entries: PoolEntry[], golferMap: Map<string, Golfer
       eliminated,
       cutCount: cutStarters.length,
       promotedCount: promotedBench.length,
+      penaltyStrokes,
       activeSlots,
       benchSlots,
       roster,
