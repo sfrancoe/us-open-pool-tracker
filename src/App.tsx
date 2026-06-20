@@ -340,7 +340,7 @@ function RosterChips({ entry, currentRound }: { entry: EntryScore; currentRound:
             <small>{slot.role === 'bench' ? (slot.state === 'promoted' ? 'B+' : 'B') : 'S'}</small>
             <b>{slot.name}</b>
             <span className={`today-score ${today.score === null ? '' : scoreClass(today.score)}`}>{today.label}</span>
-            <span className="hole-label">{playPositionLabel(slot.golfer)}</span>
+            <span className="hole-label">{playPositionLabel(slot.golfer, currentRound)}</span>
             <em className={scoreClass(slot.golfer.score)}>{slot.golfer.scoreLabel}</em>
           </span>
         )
@@ -436,7 +436,7 @@ function TeeTimesView({ liveScores, teeTimes, currentRound }: { liveScores: Golf
       <div className="tee-list">
         {rows.map((teeTime) => {
           const golfer = golferMap.get(normalizeName(teeTime.name))
-          const today = todayScore(golfer, currentRound)
+          const today = todayScore(golfer, currentRound, teeTime)
           return (
             <article key={`${teeTime.name}-${teeTime.teeTime}-${teeTime.startHole}`} className={`tee-row ${isPoolCut(golfer) ? 'cut' : ''}`}>
               <div>
@@ -444,7 +444,7 @@ function TeeTimesView({ liveScores, teeTimes, currentRound }: { liveScores: Golf
                 <small>{golfer?.country ?? 'U.S. Open field'}</small>
               </div>
               <strong className={`today-score ${today.score === null ? '' : scoreClass(today.score)}`}>{today.label}</strong>
-              <span className="hole-label">{playPositionLabel(golfer, teeTime)}</span>
+              <span className="hole-label">{playPositionLabel(golfer, currentRound, teeTime)}</span>
               <em className={scoreClass(golfer?.score ?? 0)}>{golfer?.scoreLabel ?? 'E'}</em>
             </article>
           )
@@ -455,26 +455,47 @@ function TeeTimesView({ liveScores, teeTimes, currentRound }: { liveScores: Golf
 }
 
 function currentRoundDay(golfers: GolferScore[]) {
-  return golfers.reduce((round, golfer) => {
+  const dataRound = golfers.reduce((round, golfer) => {
     const latestRound = golfer.rounds.reduce((latest, score) => score.available ? Math.max(latest, score.day) : latest, 1)
     return Math.max(round, latestRound)
   }, 1)
+
+  return Math.max(dataRound, scheduledRoundDay())
 }
 
-function todayScore(golfer: GolferScore | undefined, currentRound: number) {
+function scheduledRoundDay(now = new Date()) {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/New_York',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(now)
+  const datePart = (type: string) => Number(parts.find((part) => part.type === type)?.value)
+  const currentDate = Date.UTC(datePart('year'), datePart('month') - 1, datePart('day'))
+  const roundOneDate = Date.UTC(2026, 5, 18)
+  const round = Math.floor((currentDate - roundOneDate) / 86_400_000) + 1
+  return Math.min(4, Math.max(1, round))
+}
+
+function todayScore(golfer: GolferScore | undefined, currentRound: number, teeTime?: TeeTime) {
   const round = golfer?.rounds.find((score) => score.day === currentRound)
+  if (!round?.available) {
+    if (isPoolCut(golfer)) return { label: '-', score: null }
+    return { label: golfer?.teeTime ?? teeTime?.teeTime ?? '-', score: null }
+  }
   if (!round?.available || round.score === null) return { label: '-', score: null }
   return { label: round.scoreLabel, score: round.score }
 }
 
-function playPositionLabel(golfer: GolferScore | undefined, teeTime?: TeeTime) {
-  if (!golfer || golfer.status === 'pending') return golfer?.teeTime ?? teeTime?.teeTime ?? '-'
+function playPositionLabel(golfer: GolferScore | undefined, currentRound: number, teeTime?: TeeTime) {
+  const round = golfer?.rounds.find((score) => score.day === currentRound)
+  if (!golfer || !round?.available) return '-'
   if (golfer.status === 'withdrawn') return 'WD'
   if (golfer.status === 'cut') return 'CUT'
-  if (golfer.status === 'final' || golfer.thru === 'F') return 'F'
+  if (round.status === 'final' || round.thru === 'F') return 'F'
 
-  const thru = Number(golfer.thru)
-  const completedHoles = Number.isFinite(thru) ? thru : golfer.holes.length
+  const thru = Number(round.thru)
+  const completedHoles = Number.isFinite(thru) ? thru : round.holes.length
   if (completedHoles >= 18) return 'F'
 
   const startHole = golfer.startHole ?? teeTime?.startHole ?? 1
