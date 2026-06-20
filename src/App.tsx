@@ -479,11 +479,10 @@ function scheduledRoundDay(now = new Date()) {
 
 function todayScore(golfer: GolferScore | undefined, currentRound: number, teeTime?: TeeTime) {
   const round = golfer?.rounds.find((score) => score.day === currentRound)
-  if (!round?.available) {
+  if (!round?.available || round.score === null) {
     if (isPoolCut(golfer)) return { label: '-', score: null }
     return { label: golfer?.teeTime ?? teeTime?.teeTime ?? '-', score: null }
   }
-  if (!round?.available || round.score === null) return { label: '-', score: null }
   return { label: round.scoreLabel, score: round.score }
 }
 
@@ -496,6 +495,7 @@ function playPositionLabel(golfer: GolferScore | undefined, currentRound: number
 
   const thru = Number(round.thru)
   const completedHoles = Number.isFinite(thru) ? thru : round.holes.length
+  if (round.score === null && completedHoles === 0) return '-'
   if (completedHoles >= 18) return 'F'
 
   const startHole = golfer.startHole ?? teeTime?.startHole ?? 1
