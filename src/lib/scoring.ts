@@ -497,7 +497,15 @@ function golferAliases(displayName: string) {
 
 export function isPoolCut(golfer?: GolferScore) {
   if (!golfer) return false
-  return golfer.status === 'cut' || golfer.status === 'withdrawn' || golfer.score >= 5
+  if (golfer.status === 'withdrawn') return true
+
+  const roundOneScore = golfer.rounds.find((round) => round.day === 1)?.score
+  const roundTwoScore = golfer.rounds.find((round) => round.day === 2)?.score
+  const hasCutScore = roundOneScore !== null && roundOneScore !== undefined && roundTwoScore !== null && roundTwoScore !== undefined
+
+  if (hasCutScore) return roundOneScore + roundTwoScore >= 5
+
+  return golfer.status === 'cut'
 }
 
 function rankEntries<T extends { total: number; name: string; eliminated?: boolean }>(entries: T[]) {
