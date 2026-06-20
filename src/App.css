@@ -315,7 +315,7 @@
 
 .entry-name strong,
 .overall-row strong,
-.tee-row strong {
+.tee-row > div > strong {
   min-width: 0;
   overflow: hidden;
   color: #17231d;
@@ -402,13 +402,13 @@
 }
 
 .player-chip.with-scores {
-  grid-template-columns: 22px minmax(0, 1fr) 62px 42px 38px;
+  grid-template-columns: 22px minmax(0, 1fr) 70px 34px 36px;
 }
 
 .penalty-row {
   min-height: 28px;
   display: grid;
-  grid-template-columns: 22px minmax(0, 1fr) 62px 42px 38px;
+  grid-template-columns: 22px minmax(0, 1fr) 70px 34px 36px;
   align-items: center;
   gap: 5px;
   border: 1px dashed #d9cba7;
@@ -515,7 +515,7 @@
 
 .roster-score-header {
   display: grid;
-  grid-template-columns: 22px minmax(0, 1fr) 62px 42px 38px;
+  grid-template-columns: 22px minmax(0, 1fr) 70px 34px 36px;
   align-items: center;
   gap: 5px;
   padding: 0 6px;
@@ -542,7 +542,7 @@
 }
 
 .tee-row {
-  grid-template-columns: minmax(0, 1fr) 62px 42px 44px;
+  grid-template-columns: minmax(0, 1fr) 70px 34px 40px;
 }
 
 .tee-row em {
@@ -552,7 +552,7 @@
 
 .tee-header {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 62px 42px 44px;
+  grid-template-columns: minmax(0, 1fr) 70px 34px 40px;
   align-items: center;
   gap: 8px;
   color: #8a7640;
@@ -689,13 +689,13 @@
   }
 
   .tee-header {
-    grid-template-columns: minmax(0, 1fr) 58px 38px 40px;
+    grid-template-columns: minmax(0, 1fr) 70px 32px 38px;
     gap: 6px;
     margin: 0 8px 5px;
   }
 
   .tee-row {
-    grid-template-columns: minmax(0, 1fr) 58px 38px 40px;
+    grid-template-columns: minmax(0, 1fr) 70px 32px 38px;
     gap: 6px;
     padding: 9px 8px;
   }
@@ -708,6 +708,6 @@
 
   .tee-header,
   .tee-row {
-    grid-template-columns: minmax(0, 1fr) 54px 34px 36px;
+    grid-template-columns: minmax(0, 1fr) 68px 30px 36px;
   }
 }
