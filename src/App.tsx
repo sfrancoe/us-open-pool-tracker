@@ -555,13 +555,15 @@ function playPositionLabel(golfer: GolferScore | undefined, currentRound: number
   if (round.score === null && completedHoles === 0) return '-'
   if (completedHoles >= 18) return 'F'
 
-  const startHole = golfer.startHole ?? teeTime?.startHole ?? 1
+  const startHole = currentRoundStartHole(round) ?? teeTime?.startHole ?? golfer.startHole ?? 1
   const marker = startHole === 10 ? '*' : ''
-  return `${nextHoleFromStart(startHole, Math.max(completedHoles, 0))}${marker}`
+  return `${completedHoles}${marker}`
 }
 
-function nextHoleFromStart(startHole: TeeTime['startHole'], completedHoles: number) {
-  return ((startHole - 1 + completedHoles) % 18) + 1
+function currentRoundStartHole(round: GolferScore['rounds'][number]) {
+  const firstHole = round.holes[0]?.hole
+  if (firstHole === 1 || firstHole === 10) return firstHole
+  return undefined
 }
 
 function SectionTitle({ kicker, title }: { kicker: string; title: string }) {

@@ -244,7 +244,7 @@ function toHoleScores(linescores?: EspnHoleScore[]): HoleScore[] {
         }
       })
       .filter((hole) => hole.hole >= 1 && hole.hole <= 18)
-      .sort((a, b) => a.hole - b.hole) ?? []
+      ?? []
   )
 }
 
