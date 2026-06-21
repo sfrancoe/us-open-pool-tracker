@@ -455,12 +455,12 @@ export function buildGolferMap(liveScores: GolferScore[], teeTimes: StaticTeeTim
   return map
 }
 
-const manualGolferAliasTargets: Record<string, string> = {
+const manualGolferAliasTargets: Record<string, string | string[]> = {
   'Bryson DeChambeau': 'dechambeaub',
   'Xander Schauffele': 'schaufelex',
   'Russell Henley': 'henleyt',
   'Patrick Cantlay': 'canylayp',
-  'Kurt Kitayama': 'kityamak',
+  'Kurt Kitayama': ['kityamak', 'kitiyamak'],
   'Maverick McNealy': 'mcneallym',
   'Matt McCarty': 'mccarthyd',
   'Hideki Matsuyama': 'matsuymah',
@@ -493,7 +493,11 @@ function golferAliases(displayName: string) {
   }
 
   const manual = manualGolferAliasTargets[displayName]
-  if (manual) normalized.add(manual)
+  if (Array.isArray(manual)) {
+    for (const alias of manual) normalized.add(alias)
+  } else if (manual) {
+    normalized.add(manual)
+  }
 
   return normalized
 }
