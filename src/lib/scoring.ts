@@ -477,8 +477,11 @@ function golferAliases(displayName: string) {
   const parts = displayName.split(/\s+/).filter(Boolean)
   const lastName = parts.at(-1)
   const firstName = parts[0]
+  const givenNames = parts.slice(0, -1).join(' ')
 
   if (lastName && firstName) {
+    normalized.add(normalizeName(`${lastName}, ${givenNames}`))
+    normalized.add(normalizeName(`${lastName} ${givenNames}`))
     normalized.add(normalizeName(`${lastName}, ${firstName[0]}`))
     normalized.add(normalizeName(`${lastName} ${firstName[0]}`))
     normalized.add(normalizeName(`${lastName}, ${firstName.slice(0, 3)}`))
